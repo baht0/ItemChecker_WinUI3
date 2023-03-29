@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ItemChecker (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ItemChecker (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
