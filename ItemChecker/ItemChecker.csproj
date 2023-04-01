@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net7.0-windows10.0.19041.0</TargetFramework>
@@ -14,21 +14,40 @@
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Views\MainPage.xaml" />
+    <Content Remove="Assets\logo.altform-lightunplated_targetsize-16.png" />
+    <Content Remove="Assets\logo.altform-lightunplated_targetsize-24.png" />
+    <Content Remove="Assets\logo.altform-lightunplated_targetsize-256.png" />
+    <Content Remove="Assets\logo.altform-lightunplated_targetsize-32.png" />
+    <Content Remove="Assets\logo.altform-lightunplated_targetsize-48.png" />
+    <Content Remove="Assets\logo.altform-unplated_targetsize-16.png" />
+    <Content Remove="Assets\logo.altform-unplated_targetsize-24.png" />
+    <Content Remove="Assets\logo.altform-unplated_targetsize-256.png" />
+    <Content Remove="Assets\logo.altform-unplated_targetsize-32.png" />
+    <Content Remove="Assets\logo.altform-unplated_targetsize-48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Assets\BadgeLogo.scale-100.png" />
+    <None Remove="Assets\BadgeLogo.scale-125.png" />
+    <None Remove="Assets\BadgeLogo.scale-150.png" />
+    <None Remove="Assets\BadgeLogo.scale-200.png" />
+    <None Remove="Assets\BadgeLogo.scale-400.png" />
+    <None Remove="Assets\logo.targetsize-16.png" />
+    <None Remove="Assets\logo.targetsize-24.png" />
+    <None Remove="Assets\logo.targetsize-256.png" />
+    <None Remove="Assets\logo.targetsize-32.png" />
+    <None Remove="Assets\logo.targetsize-48.png" />
+    <None Remove="Assets\SplashScreen.scale-100.png" />
+    <None Remove="Assets\SplashScreen.scale-125.png" />
+    <None Remove="Assets\SplashScreen.scale-150.png" />
+    <None Remove="Assets\SplashScreen.scale-200.png" />
+    <None Remove="Assets\SplashScreen.scale-400.png" />
+    <None Remove="Views\ParserPage.xaml" />
+    <None Remove="Views\SettingsPage.xaml" />
     <None Remove="Views\SteamPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\SplashScreen.scale-200.png" />
-    <Content Include="Assets\LockScreenLogo.scale-200.png" />
-    <Content Include="Assets\Square150x150Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\StoreLogo.png" />
-    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.WinUI" Version="7.1.2" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230313.1" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
     <Manifest Include="$(ApplicationManifest)" />
@@ -47,12 +66,17 @@
     <Folder Include="ViewModels\" />
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\SteamPage.xaml">
+    <Page Update="Views\SettingsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\MainPage.xaml">
+    <Page Update="Views\ParserPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\SteamPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

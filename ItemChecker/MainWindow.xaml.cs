@@ -1,57 +1,96 @@
 using ItemChecker.Views;
-using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using System;
-using Windows.Graphics;
-using WinRT.Interop;
+using System.Linq;
+using Windows.ApplicationModel;
 
 namespace ItemChecker
 {
     public partial class MainWindow : Window
     {
-        private AppWindow m_AppWindow;
         public MainWindow()
         {
             this.InitializeComponent();
-            m_AppWindow = GetAppWindowForCurrentWindow();
-            CenterOfScreen(this);
-            Title = "ItemChecker";
-
-            var mainPage = new MainPage();
-            Content = mainPage;
             if (AppWindowTitleBar.IsCustomizationSupported())
             {
                 ExtendsContentIntoTitleBar = true;
-                var titleBar = mainPage.CreateAppTitleBar(Title);
-                SetTitleBar(titleBar);
+                SetTitleBar(TitleBar);
             }
             else
             {
-                mainPage.RemoveGridRow();
+                TitleBar.Visibility = Visibility.Collapsed;
+                MainGrid.RowDefinitions.Remove(TitleRow);
+            }
+
+            NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().First();
+            ContentFrame.Navigate(typeof(SteamPage));
+        }
+
+        public string GetAppTitleFromSystem()
+        {
+            return Package.Current.DisplayName;
+        }
+
+        public async void Exit_ShowDialog()
+        {
+            var dialog = new ContentDialog()
+            {
+                XamlRoot = MainGrid.XamlRoot,
+                Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
+                Title = "Do you really want to quit?",
+                PrimaryButtonText = "Yes",
+                CloseButtonText = "No",
+                DefaultButton = ContentDialogButton.Primary,
+            };
+            var result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                App.HandleClosedEvents = false;
+                App.MainWindow.Close();
             }
         }
-        AppWindow GetAppWindowForCurrentWindow()
+        private void Window_Closed(object sender, WindowEventArgs args)
         {
-            IntPtr hWnd = WindowNative.GetWindowHandle(this);
-            WindowId wndId = Win32Interop.GetWindowIdFromWindow(hWnd);
-            return AppWindow.GetFromWindowId(wndId);
+            Exit_ShowDialog();
         }
-        void CenterOfScreen(Window window)
+
+        private void NavigationViewControl_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
         {
-            if (DisplayArea.GetFromWindowId(m_AppWindow.OwnerWindowId, DisplayAreaFallback.Nearest) is DisplayArea displayArea)
+            if (args.IsSettingsInvoked == true)
             {
-                PointInt32 CenteredPosition = m_AppWindow.Position;
-                CenteredPosition.X = (displayArea.WorkArea.Width - m_AppWindow.Size.Width) / 2;
-                CenteredPosition.Y = (displayArea.WorkArea.Height - m_AppWindow.Size.Height) / 2;
-                m_AppWindow.Move(CenteredPosition);
+                ContentFrame.Navigate(typeof(Views.SettingsPage), null, args.RecommendedNavigationTransitionInfo);
+            }
+            else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
+            {
+                Type newPage = Type.GetType(args.InvokedItemContainer.Tag.ToString());
+                ContentFrame.Navigate(
+                       newPage,
+                       null,
+                       args.RecommendedNavigationTransitionInfo
+                       );
             }
         }
 
-        private void Window_Closed(object sender, WindowEventArgs args)
+        private void ContentFrame_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
         {
-            m_AppWindow.Hide();
-            args.Handled = true;
+            NavigationViewControl.IsBackEnabled = ContentFrame.CanGoBack;
+
+            if (ContentFrame.SourcePageType == typeof(Views.SettingsPage))
+            {
+                // SettingsItem is not part of NavView.MenuItems, and doesn't have a Tag.
+                NavigationViewControl.SelectedItem = (NavigationViewItem)NavigationViewControl.SettingsItem;
+            }
+            else if (ContentFrame.SourcePageType != null)
+            {
+                NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems
+                    .OfType<NavigationViewItem>()
+                    .First(n => n.Tag.Equals(ContentFrame.SourcePageType.FullName.ToString()));
+            }
+
+            NavigationViewControl.Header = ((NavigationViewItem)NavigationViewControl.SelectedItem)?.Content?.ToString();
         }
     }
 }
