@@ -2,6 +2,7 @@ using ItemChecker.Views;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Linq;
 using Windows.ApplicationModel;
@@ -13,6 +14,10 @@ namespace ItemChecker
         public MainWindow()
         {
             this.InitializeComponent();
+
+            if (App.IsMicaSupported)
+                MainGrid.Background = Application.Current.Resources["ApplicationPageBackgroundThemeBrush"] as SolidColorBrush;
+
             if (AppWindowTitleBar.IsCustomizationSupported())
             {
                 ExtendsContentIntoTitleBar = true;
@@ -78,11 +83,8 @@ namespace ItemChecker
         {
             NavigationViewControl.IsBackEnabled = ContentFrame.CanGoBack;
 
-            if (ContentFrame.SourcePageType == typeof(Views.SettingsPage))
-            {
-                // SettingsItem is not part of NavView.MenuItems, and doesn't have a Tag.
+            if (ContentFrame.SourcePageType == typeof(SettingsPage))
                 NavigationViewControl.SelectedItem = (NavigationViewItem)NavigationViewControl.SettingsItem;
-            }
             else if (ContentFrame.SourcePageType != null)
             {
                 NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems

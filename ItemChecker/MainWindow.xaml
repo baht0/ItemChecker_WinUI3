@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d" Closed="Window_Closed">
-    <Grid x:Name="MainGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid x:Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="35" x:Name="TitleRow"/>
             <RowDefinition/>
@@ -16,10 +16,8 @@
             <Image Height="18" HorizontalAlignment="Left" VerticalAlignment="Center" Source="/Assets/logo.scale-100.png" />
             <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind GetAppTitleFromSystem()}"/>
         </StackPanel>
-        <NavigationView Grid.Row="1" x:Name="NavigationViewControl"
-                        IsTitleBarAutoPaddingEnabled="False" AlwaysShowHeader="True"
-                        Header="Default Header" IsPaneOpen="False" IsTabStop="False" IsBackButtonVisible="Collapsed"
-                        ItemInvoked="NavigationViewControl_ItemInvoked">
+        <NavigationView Grid.Row="1" x:Name="NavigationViewControl" IsTitleBarAutoPaddingEnabled="False" AlwaysShowHeader="True"
+                        Header="Default Header" IsPaneOpen="False" IsTabStop="False" IsBackButtonVisible="Collapsed" ItemInvoked="NavigationViewControl_ItemInvoked">
             <NavigationView.MenuItems>
                 <NavigationViewItemHeader Content="Tables"/>
                 <NavigationViewItem Icon="Home" Content="Steam" IsSelected="True" Tag="ItemChecker.Views.SteamPage"/>

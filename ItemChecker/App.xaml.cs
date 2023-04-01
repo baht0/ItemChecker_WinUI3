@@ -20,7 +20,7 @@ namespace ItemChecker
         private static Window m_window;
         internal static Window MainWindow => m_window;
         public static bool HandleClosedEvents { get; set; } = true;
-        public bool IsMicaSupported { get; set; }
+        public static bool IsMicaSupported { get; set; }
 
         public App()
         {
@@ -39,13 +39,14 @@ namespace ItemChecker
                         Title = "ItemChecker"
                     };
                     m_window.Closed += Window_Closed;
-                    m_window.Activate();
 
                     appWindow = GetAppWindow(m_window);
                     appWindow.SetIcon("/Assets/icon.ico");
                     CenterOfScreen();
 
                     IsMicaSupported = TrySetMicaBackdrop();
+
+                    m_window.Activate();
                 }
                 else
                 {
@@ -54,7 +55,7 @@ namespace ItemChecker
                 }
             }
         }
-        void CenterOfScreen()
+        private void CenterOfScreen()
         {
             if (DisplayArea.GetFromWindowId(appWindow.OwnerWindowId, DisplayAreaFallback.Nearest) is DisplayArea displayArea)
             {
@@ -71,7 +72,7 @@ namespace ItemChecker
             WindowId windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
             return AppWindow.GetFromWindowId(windowId);
         }
-        bool TrySetMicaBackdrop()
+        private bool TrySetMicaBackdrop()
         {
             if (Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported())
             {
