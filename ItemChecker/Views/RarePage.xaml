@@ -2,7 +2,7 @@
 <!-- Licensed under the MIT License. -->
 
 <Page
-    x:Class="ItemChecker.Views.ParserPage"
+    x:Class="ItemChecker.Views.RarePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ItemChecker.Views"
@@ -48,7 +48,8 @@
         </Grid.RowDefinitions>
         <!--TableInfo-->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-            <TextBlock Text="Found: 0" FontSize="16" Margin="0 0 10 0" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+            <TextBlock Text="Found: 0" FontSize="16" Margin="0 0 10 0"
+                       VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
                 <AppBarSeparator/>
                 <AppBarButton Label="Info">
@@ -86,22 +87,30 @@
         </StackPanel>
         <!--Actions-->
         <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Right">
-            <AppBarButton Label="Parse" Icon="Play" Click="Check_Click"/>
-            <AppBarButton Label="Continue">
+            <AppBarButton Icon="Play" Label="Check" Click="Check_Click"/>
+            <AppBarButton Label="Items">
                 <AppBarButton.Icon>
-                    <FontIcon Glyph="&#xE9F3;"/>
+                    <FontIcon Glyph="&#xE9CE;"/>
                 </AppBarButton.Icon>
-            </AppBarButton>
-            <AppBarButton Label="Import" Click="Import_Click">
-                <AppBarButton.Icon>
-                    <FontIcon Glyph="&#xE8B5;"/>
-                </AppBarButton.Icon>
-            </AppBarButton>
-            <AppBarSeparator/>
-            <AppBarButton Label="Place orders" Click="PlaceOrders_Click">
-                <AppBarButton.Icon>
-                    <FontIcon Glyph="&#xF156;"/>
-                </AppBarButton.Icon>
+                <AppBarButton.Flyout>
+                    <Flyout Placement="Bottom">
+                        <Grid Width="300">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="What is the Items? (Required)" VerticalAlignment="Center"/>
+                                <HyperlinkButton Click="HyperlinkButton_Click">
+                                    <HyperlinkButton.Content>
+                                        <FontIcon Glyph="&#xE72D;"/>
+                                    </HyperlinkButton.Content>
+                                </HyperlinkButton>
+                            </StackPanel>
+                            <TextBlock TextWrapping="Wrap" Text="Items - this is a list of items that need to be checked, divided by parameters." Grid.Row="1" Margin="0 0 0 12"/>
+                        </Grid>
+                    </Flyout>
+                </AppBarButton.Flyout>
             </AppBarButton>
         </CommandBar>
         <!--DataGrid-->
@@ -125,19 +134,21 @@
                                         RowGroupHeaderPropertyNameAlternative="Range">
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Header="ItemName" Binding="{Binding Rank}" Tag="Rank" MinWidth="320"/>
-                <controls:DataGridTextColumn Header="Purchase" Binding="{Binding Mountain}" Tag="Mountain" />
-                <controls:DataGridTextColumn Header="Price" Binding="{Binding Height_m}" Tag="Height_m" />
-                <controls:DataGridTextColumn Header="Get" Binding="{Binding Range}" Tag="Range" />
+                <controls:DataGridTextColumn Header="Float" Binding="{Binding Mountain}" Tag="Mountain" />
+                <controls:DataGridTextColumn Header="Stickers" Binding="{Binding Height_m}" Tag="Height_m" />
+                <controls:DataGridTextColumn Header="Phase" Binding="{Binding Range}" Tag="Range" />
+                <controls:DataGridTextColumn Header="Price" Binding="{Binding Parent_mountain}" Tag="First_ascent"/>
+                <controls:DataGridTextColumn Header="Compare" Binding="{Binding Parent_mountain}" Tag="First_ascent"/>
                 <controls:DataGridTextColumn Header="Precent" Binding="{Binding Parent_mountain}" Tag="Parent_mountain" />
                 <controls:DataGridTextColumn Header="Difference" Binding="{Binding Parent_mountain}" Tag="First_ascent"/>
             </controls:DataGrid.Columns>
         </controls:DataGrid>
         <Grid Grid.Row="1" Background="Black" Opacity="0.2"/>
-        <InfoBar Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" IsClosable="False"
-                     IsOpen="True" Title="Remaining:" Message="19:02 min.">
+        <InfoBar Grid.Row="1" Severity="Informational" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="InfoBar"
+                 IsClosable="False" IsOpen="True" Title="Next check:" Message="6:21 min.">
             <ProgressBar Margin="-45 0 0 0" IsIndeterminate="True" Value="50" Maximum="100"/>
         </InfoBar>
-        <!--Filters-->
+        <!--Filter-->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
@@ -173,23 +184,24 @@
                                 <ToggleMenuFlyoutItem Text="Covert" Foreground="#FFEB4B4B"/>
                                 <ToggleMenuFlyoutItem Text="Contraband" Foreground="#FFE4AE39"/>
                             </MenuFlyoutSubItem>
-                            <MenuFlyoutSubItem Text="Types">
-                                <ToggleMenuFlyoutItem Text="Weapon" IsChecked="{Binding Weapon}"/>
-                                <ToggleMenuFlyoutItem Text="Knife" IsChecked="{Binding Knife}"/>
-                                <ToggleMenuFlyoutItem Text="Gloves" IsChecked="{Binding Gloves}"/>
-                                <ToggleMenuFlyoutItem Text="Agent" IsChecked="{Binding Agent}"/>
-                                <ToggleMenuFlyoutItem Text="Sticker" IsChecked="{Binding Sticker}"/>
-
-                                <ToggleMenuFlyoutItem Text="Patch" IsChecked="{Binding Patch}"/>
-                                <ToggleMenuFlyoutItem Text="Collectible" IsChecked="{Binding Collectible}"/>
-                                <ToggleMenuFlyoutItem Text="Key" IsChecked="{Binding Key}"/>
-                                <ToggleMenuFlyoutItem Text="Pass" IsChecked="{Binding Pass}"/>
-                                <ToggleMenuFlyoutItem Text="Music Kit" IsChecked="{Binding MusicKit}"/>
-
-                                <ToggleMenuFlyoutItem Text="Graffiti" IsChecked="{Binding Graffiti}"/>
-                                <ToggleMenuFlyoutItem Text="Container" IsChecked="{Binding Container}"/>
-                                <ToggleMenuFlyoutItem Text="Gift" IsChecked="{Binding Gift}"/>
-                                <ToggleMenuFlyoutItem Text="Tool" IsChecked="{Binding Tool}"/>
+                            <MenuFlyoutSubItem Text="Sticker">
+                                <ToggleMenuFlyoutItem Text="Normal" Foreground="#FF4B69FF"/>
+                                <ToggleMenuFlyoutItem Text="Holo" Foreground="#FF8847FF"/>
+                                <ToggleMenuFlyoutItem Text="Glitter" Foreground="#FF8847FF"/>
+                                <ToggleMenuFlyoutItem Text="Foil" Foreground="#FFD32CE6"/>
+                                <ToggleMenuFlyoutItem Text="Lenticular" Foreground="#FFEB4B4B"/>
+                                <ToggleMenuFlyoutItem Text="Gold" Foreground="#FFEB4B4B"/>
+                                <ToggleMenuFlyoutItem Text="Contraband" Foreground="#FFE4AE39"/>
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem Text="Doppler">
+                                <ToggleMenuFlyoutItem Text="Phase 1"/>
+                                <ToggleMenuFlyoutItem Text="Phase 2"/>
+                                <ToggleMenuFlyoutItem Text="Phase 3"/>
+                                <ToggleMenuFlyoutItem Text="Phase 4"/>
+                                <ToggleMenuFlyoutItem Text="Ruby" Foreground="#F33657"/>
+                                <ToggleMenuFlyoutItem Text="Sapphire" Foreground="#9778FF"/>
+                                <ToggleMenuFlyoutItem Text="Black Pearl" Foreground="#7273A2"/>
+                                <ToggleMenuFlyoutItem Text="Emerald" Foreground="#00D074"/>
                             </MenuFlyoutSubItem>
                             <MenuFlyoutItem Text="Additional" Icon="More" Click="AdditionalBtn_Click"/>
                         </MenuFlyout>
@@ -208,24 +220,24 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0 5 0 0">
-                    <NumberBox Header="Purchase" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
-                    <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0 5 0 0">
                     <NumberBox Header="Price" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
                     <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0 5 0 0">
-                    <NumberBox Header="Get" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
+                <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0 5 0 0">
+                    <NumberBox Header="Compare" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
                     <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="0 5 0 0">
+                <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0 5 0 0">
                     <NumberBox Header="Precent" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
                     <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="4" Margin="0 5 0 0">
+                <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="0 5 0 0">
                     <NumberBox Header="Difference" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
                     <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="4" Margin="0 5 0 0">
+                    <NumberBox Header="Minimum stickers" Minimum="0" Maximum="5" Width="130" PlaceholderText="Count" SpinButtonPlacementMode="Compact"/>
+                    <ToggleSwitch Header=" " Margin="10 0 0 0" OnContent="Same Quality" OffContent="Same Quality"/>
                 </StackPanel>
             </Grid>
         </TeachingTip>

@@ -1,0 +1,14 @@
+<!-- Copyright (c) Microsoft Corporation and Contributors. -->
+<!-- Licensed under the MIT License. -->
+
+<Page
+    x:Class="ItemChecker.Views.BrowseItem.NewTabPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ItemChecker.Views.BrowseItem"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"  Margin="50 0 50 0">
+    <AutoSuggestBox PlaceholderText="Search for a item in the database" QueryIcon="Find" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="250" MaxWidth="700"
+                    x:Name="searchSuggest" TextChanged="searchSuggest_TextChanged" QuerySubmitted="searchSuggest_QuerySubmitted" SuggestionChosen="searchSuggest_SuggestionChosen"/>
+</Page>

@@ -15,22 +15,20 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
-using ItemChecker.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace ItemChecker.Views
+namespace ItemChecker.Views.Parser
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class SettingsPage : Page
+    public sealed partial class ImportPage : Page
     {
-        public SettingsPage()
+        public ImportPage()
         {
             this.InitializeComponent();
-            DataContext = new SettingsViewModel();
         }
     }
 }

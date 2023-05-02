@@ -15,27 +15,27 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
-using ItemChecker.Views.Parser;
+using ItemChecker.Views.Account.Inventory;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace ItemChecker.Views
+namespace ItemChecker.Views.Account
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class ParserPage : Page
+    public sealed partial class InventoryPage : Page
     {
-        public ParserPage()
+        public InventoryPage()
         {
             this.InitializeComponent();
         }
-        private void Check_Click(object sender, RoutedEventArgs e)
+        private void Sell_Click(object sender, RoutedEventArgs e)
         {
-            CheckShowDialogAsync();
+            SellShowDialogAsync();
         }
-        public async void CheckShowDialogAsync()
+        public async void SellShowDialogAsync()
         {
             var dialog = new ContentDialog()
             {
@@ -45,7 +45,7 @@ namespace ItemChecker.Views
                 PrimaryButtonText = "Start",
                 CloseButtonText = "Cancel",
                 DefaultButton = ContentDialogButton.Primary,
-                Content = new ParametersPage(),
+                Content = new SellParametersPage(),
             };
             var result = await dialog.ShowAsync();
 
@@ -53,40 +53,6 @@ namespace ItemChecker.Views
             {
                 //
             }
-        }
-
-        private void Import_Click(object sender, RoutedEventArgs e)
-        {
-            ImportShowDialogAsync();
-        }
-        public async void ImportShowDialogAsync()
-        {
-            var dialog = new ContentDialog()
-            {
-                XamlRoot = this.XamlRoot,
-                Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
-                Title = "Select",
-                PrimaryButtonText = "Import",
-                CloseButtonText = "Cancel",
-                DefaultButton = ContentDialogButton.Primary,
-                Content = new ImportPage(),
-            };
-            var result = await dialog.ShowAsync();
-
-            if (result == ContentDialogResult.Primary)
-            {
-                //
-            }
-        }
-
-        private void AdditionalBtn_Click(object sender, RoutedEventArgs e)
-        {
-            FilterTeachingTip.IsOpen = true;
-        }
-
-        private void PlaceOrders_Click(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

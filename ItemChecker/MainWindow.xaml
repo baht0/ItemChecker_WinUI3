@@ -9,30 +9,47 @@
     mc:Ignorable="d" Closed="Window_Closed">
     <Grid x:Name="MainGrid">
         <Grid.RowDefinitions>
-            <RowDefinition Height="35" x:Name="TitleRow"/>
+            <RowDefinition Height="30" x:Name="TitleRow"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <StackPanel x:Name="TitleBar" Orientation="Horizontal" Margin="15 0 0 0">
             <Image Height="18" HorizontalAlignment="Left" VerticalAlignment="Center" Source="/Assets/logo.scale-100.png" />
-            <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind GetAppTitleFromSystem()}"/>
+            <TextBlock Margin="15,0,0,0" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind GetAppTitleFromSystem()}"/>
         </StackPanel>
-        <NavigationView Grid.Row="1" x:Name="NavigationViewControl" IsTitleBarAutoPaddingEnabled="False" AlwaysShowHeader="True"
-                        Header="Default Header" IsPaneOpen="False" IsTabStop="False" IsBackButtonVisible="Collapsed" ItemInvoked="NavigationViewControl_ItemInvoked">
+        <NavigationView Grid.Row="1" x:Name="NavigationViewControl" OpenPaneLength="230" AlwaysShowHeader="True"
+                        IsTitleBarAutoPaddingEnabled="False" IsTabStop="False" IsBackButtonVisible="Collapsed" ItemInvoked="NavigationViewControl_ItemInvoked">
+            <NavigationView.HeaderTemplate>
+                <DataTemplate>
+                    <Grid Margin="0,0,0,0" Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel x:Name="pageTitle" Background="Transparent" Height="54" VerticalAlignment="Top">
+                            <TextBlock Style="{StaticResource TitleTextBlockStyle}" FontSize="24" VerticalAlignment="Center" Text="{Binding}"/>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </NavigationView.HeaderTemplate>
             <NavigationView.MenuItems>
-                <NavigationViewItemHeader Content="Tables"/>
-                <NavigationViewItem Icon="Home" Content="Steam" IsSelected="True" Tag="ItemChecker.Views.SteamPage"/>
+                <NavigationViewItemHeader Content="Main Tables"/>
                 <NavigationViewItem Content="Parser" Tag="ItemChecker.Views.ParserPage">
                     <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xf6fa;"/>
+                        <FontIcon Glyph="&#xf6fa;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Rare">
+                <NavigationViewItem Content="Buy Orders" Tag="ItemChecker.Views.BuyOrdersPage">
                     <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xf4a5;"/>
+                        <FontIcon Glyph="&#xEAFC;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItemHeader Content="Helpers"/>
-                <NavigationViewItem Icon="Link" Content="Links" SelectsOnInvoked="False">
+                <NavigationViewItem Content="Rare" Tag="ItemChecker.Views.RarePage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xf4a5;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItemHeader Content="Other"/>
+                <!--<NavigationViewItem Icon="Link" Content="Links" SelectsOnInvoked="False">
                     <NavigationViewItem.MenuItems>
                         <NavigationViewItem Content="SteamMarket" SelectsOnInvoked="False"/>
                         <NavigationViewItem Content="Inventory" SelectsOnInvoked="False"/>
@@ -40,13 +57,67 @@
                         <NavigationViewItem Content="LootFarm" SelectsOnInvoked="False"/>
                         <NavigationViewItem Content="Buff163" SelectsOnInvoked="False"/>
                     </NavigationViewItem.MenuItems>
+                </NavigationViewItem>-->
+                <NavigationViewItem Content="Browse Item" Tag="ItemChecker.Views.BrowseItemPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE721;"/>
+                    </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Icon="Calculator" Content="Calculator"/>
+                <NavigationViewItem Content="Item Base" Tag="ItemChecker.Views.ItemBasePage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8FD;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Icon="Calculator" Content="Calculator" x:Name="calculatorNavViewItem" SelectsOnInvoked="False" Tapped="calculatorNavViewItem_Tapped"/>
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
-                <NavigationViewItem Icon="ContactInfo" Content="Account"/>
+                <NavigationViewItem HorizontalAlignment="Left" Tag="ItemChecker.Views.AccountPage">
+                    <NavigationViewItem.Content>
+                        <StackPanel Orientation="Horizontal" Width="230">
+                            <PersonPicture ProfilePicture="https://avatars.akamai.steamstatic.com/7a0e6290c1769bd6ec6a438a6f7e37c0cac8f601_medium.jpg" Height="22"/>
+                            <TextBlock Text="Account" VerticalAlignment="Center" Margin="10 0 0 0"/>
+                        </StackPanel>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
             </NavigationView.FooterMenuItems>
-            <Frame x:Name="ContentFrame" Padding="55,10,0,0" Navigated="ContentFrame_Navigated"/>
+            <Frame x:Name="ContentFrame" Margin="50 0 20 10" Navigated="ContentFrame_Navigated"/>
         </NavigationView>
+        <!--Calculator-->
+        <TeachingTip x:Name="calculatorTeachingTip" Title="Calculator" PreferredPlacement="LeftBottom" Width="500">
+            <TeachingTip.Content>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Compare" Style="{StaticResource BaseTextBlockStyle}"/>
+                    <NavigationViewItemSeparator VerticalAlignment="Bottom" Grid.Row="1"/>
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Purchase" Grid.Row="0" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"/>
+
+                        <TextBlock Text="Price" Grid.Row="1" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"/>
+                        
+                        <TextBlock Text="Commission" Grid.Row="2" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Row="2" Grid.Column="1" />
+                        <TextBox Grid.Row="2" Grid.Column="2"/>
+                    </Grid>
+                </Grid>
+            </TeachingTip.Content>
+        </TeachingTip>
     </Grid>
 </Window>

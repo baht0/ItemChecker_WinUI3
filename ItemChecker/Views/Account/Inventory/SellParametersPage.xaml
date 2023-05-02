@@ -1,0 +1,23 @@
+<!-- Copyright (c) Microsoft Corporation and Contributors. -->
+<!-- Licensed under the MIT License. -->
+
+<Page
+    x:Class="ItemChecker.Views.Account.Inventory.SellParametersPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ItemChecker.Views.Account.Inventory"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <StackPanel>
+        <StackPanel HorizontalAlignment="Left" MinWidth="200">
+            <ToggleSwitch OnContent="All Marketable" OffContent="All Marketable"/>
+            <ComboBox Header="Selling price" SelectedIndex="0" Width="170" VerticalAlignment="Center">
+                <ComboBox.Items>
+                    <ComboBoxItem>LowestSellOrder</ComboBoxItem>
+                    <ComboBoxItem>HighestBuyOrder</ComboBoxItem>
+                </ComboBox.Items>
+            </ComboBox>
+        </StackPanel>
+    </StackPanel>
+</Page>

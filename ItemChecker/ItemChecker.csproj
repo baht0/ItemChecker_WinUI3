@@ -41,13 +41,27 @@
     <None Remove="Assets\SplashScreen.scale-150.png" />
     <None Remove="Assets\SplashScreen.scale-200.png" />
     <None Remove="Assets\SplashScreen.scale-400.png" />
+    <None Remove="Views\AccountPage.xaml" />
+    <None Remove="Views\Account\InfoPage.xaml" />
+    <None Remove="Views\Account\InventoryPage.xaml" />
+    <None Remove="Views\Account\Inventory\SellParametersPage.xaml" />
+    <None Remove="Views\BrowseItemPage.xaml" />
+    <None Remove="Views\BrowseItem\NewTabPage.xaml" />
+    <None Remove="Views\BuyOrdersPage.xaml" />
+    <None Remove="Views\BuyOrders\ParametersPage.xaml" />
+    <None Remove="Views\ItemBasePage.xaml" />
+    <None Remove="Views\ItemBase\HomePage.xaml" />
     <None Remove="Views\ParserPage.xaml" />
+    <None Remove="Views\Parser\ImportPage.xaml" />
+    <None Remove="Views\Parser\ParametersPage.xaml" />
+    <None Remove="Views\Parser\PlaceOrderPage.xaml" />
+    <None Remove="Views\RarePage.xaml" />
+    <None Remove="Views\Rare\ParametersPage.xaml" />
     <None Remove="Views\SettingsPage.xaml" />
-    <None Remove="Views\SteamPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.WinUI" Version="7.1.2" />
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230313.1" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
     <Manifest Include="$(ApplicationManifest)" />
@@ -63,7 +77,81 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
-    <Folder Include="ViewModels\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\BrowseItem\NewTabPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\BrowseItemPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\ItemBase\HomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Parser\PlaceOrderPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Account\Inventory\SellParametersPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\ItemBasePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Rare\ParametersPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\BuyOrders\ParametersPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\BuyOrdersPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Account\InventoryPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Account\InfoPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Parser\ParametersPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Parser\ImportPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\AccountPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\RarePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\SettingsPage.xaml">
@@ -72,11 +160,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\ParserPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\SteamPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

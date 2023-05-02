@@ -1,0 +1,25 @@
+<!-- Copyright (c) Microsoft Corporation and Contributors. -->
+<!-- Licensed under the MIT License. -->
+
+<Page
+    x:Class="ItemChecker.Views.AccountPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:views="using:ItemChecker.Views"
+    xmlns:local="using:ItemChecker.Views.Account"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Grid>
+        <Pivot Margin="0 0 0 0">
+            <PivotItem Header="Information" Margin="10 10 10 0">
+                <local:InfoPage/>
+            </PivotItem>
+            <PivotItem Header="Inventory">
+                <local:InventoryPage/>
+            </PivotItem>
+        </Pivot>
+    </Grid>
+</Page>

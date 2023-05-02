@@ -7,20 +7,20 @@ using Microsoft.UI;
 using WinRT;
 using ItemChecker.Helpers;
 using Windows.Graphics;
+using Microsoft.UI.Composition.SystemBackdrops;
 
 namespace ItemChecker
 {
     public partial class App : Application
     {
         private WindowsSystemDispatcherQueueHelper m_wsqdHelper;
-        private Microsoft.UI.Composition.SystemBackdrops.MicaController m_micaController;
-        private Microsoft.UI.Composition.SystemBackdrops.SystemBackdropConfiguration m_configurationSource;
+        private MicaController m_micaController;
+        private SystemBackdropConfiguration m_configurationSource;
         private AppWindow appWindow;
 
         private static Window m_window;
         internal static Window MainWindow => m_window;
         public static bool HandleClosedEvents { get; set; } = true;
-        public static bool IsMicaSupported { get; set; }
 
         public App()
         {
@@ -43,8 +43,7 @@ namespace ItemChecker
                     appWindow = GetAppWindow(m_window);
                     appWindow.SetIcon("/Assets/icon.ico");
                     CenterOfScreen();
-
-                    IsMicaSupported = TrySetMicaBackdrop();
+                    TrySetMicaBackdrop();
 
                     m_window.Activate();
                 }
@@ -72,15 +71,15 @@ namespace ItemChecker
             WindowId windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
             return AppWindow.GetFromWindowId(windowId);
         }
-        private bool TrySetMicaBackdrop()
+        private void TrySetMicaBackdrop()
         {
-            if (Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported())
+            if (MicaController.IsSupported())
             {
                 m_wsqdHelper = new WindowsSystemDispatcherQueueHelper();
                 m_wsqdHelper.EnsureWindowsSystemDispatcherQueueController();
 
                 // Hooking up the policy object
-                m_configurationSource = new Microsoft.UI.Composition.SystemBackdrops.SystemBackdropConfiguration();
+                m_configurationSource = new SystemBackdropConfiguration();
                 m_window.Activated += Window_Activated;
                 ((FrameworkElement)m_window.Content).ActualThemeChanged += Window_ThemeChanged;
 
@@ -88,16 +87,13 @@ namespace ItemChecker
                 m_configurationSource.IsInputActive = true;
                 SetConfigurationSourceTheme();
 
-                m_micaController = new Microsoft.UI.Composition.SystemBackdrops.MicaController();
+                m_micaController = new MicaController();
 
                 // Enable the system backdrop.
                 // Note: Be sure to have "using WinRT;" to support the Window.As<...>() call.
                 m_micaController.AddSystemBackdropTarget(m_window.As<Microsoft.UI.Composition.ICompositionSupportsSystemBackdrop>());
                 m_micaController.SetSystemBackdropConfiguration(m_configurationSource);
-                return true; // succeeded
             }
-
-            return false; // Mica is not supported on this system
         }
         private void Window_Activated(object sender, WindowActivatedEventArgs args)
         {
@@ -109,7 +105,7 @@ namespace ItemChecker
             {
                 args.Handled = true;
             }
-            else if (IsMicaSupported)
+            else if (MicaController.IsSupported())
             {
                 // Make sure any Mica/Acrylic controller is disposed so it doesn't try to
                 // use this closed window.
