@@ -14,7 +14,7 @@
         </Grid.RowDefinitions>
         <!--TitleBar-->
         <StackPanel x:Name="TitleBar" Orientation="Horizontal" Margin="15 0 0 0">
-            <Image x:Name="Logo" Source="/Assets/logo.scale-100.png" Height="18" VerticalAlignment="Center" Visibility="Collapsed"/>
+            <Image x:Name="Logo" Source="/Assets/icon.ico" Height="20" VerticalAlignment="Center" Visibility="Collapsed"/>
             <TextBlock x:Name="LogoLabel" Text="ItemChecker" Margin="15 0 0 0" VerticalAlignment="Center" Visibility="Collapsed" Style="{StaticResource CaptionTextBlockStyle}"/>
         </StackPanel>
         <!--Content-->
