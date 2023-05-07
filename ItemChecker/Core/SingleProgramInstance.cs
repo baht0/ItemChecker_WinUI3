@@ -74,8 +74,7 @@ namespace ItemChecker.Core
             // other work arounds.
             string assemblyName =
                 Assembly.GetExecutingAssembly().GetName().Name;
-            foreach (Process otherProc in
-                Process.GetProcessesByName(assemblyName))
+            foreach (Process otherProc in Process.GetProcessesByName(assemblyName))
             {
                 //ignore "this" process
                 if (proc.Id != otherProc.Id)

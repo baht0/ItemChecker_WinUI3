@@ -1,59 +1,74 @@
-// Copyright (c) Microsoft Corporation and Contributors.
-// Licensed under the MIT License.
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Microsoft.UI.Xaml;
+﻿using System.Linq;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using ItemChecker.Views.BrowseItem;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace ItemChecker.Views
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class BrowseItemPage : Page
     {
         public BrowseItemPage()
         {
             this.InitializeComponent();
         }
+        private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            if (true)
+            {
+                CreateNewTab();
+            }
+        }
 
         private void TabView_AddButtonClick(TabView sender, object args)
         {
-            var tab = CreateNewTab();
-            sender.TabItems.Add(tab);
-            sender.SelectedItem = tab;
-        }
-        private TabViewItem CreateNewTab()
-        {
-            TabViewItem newItem = new()
-            {
-                Header = "New Tab",
-                IconSource = new SymbolIconSource() { Symbol = Symbol.Document }
-            };
-            Frame frame = new();
-            frame.Navigate(typeof(NewTabPage));
-            newItem.Content = frame;
-
-            return newItem;
+            CreateNewTab();
         }
         private void TabView_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
         {
-            sender.TabItems.Remove(args.Tab);
+            if (sender.TabItems.Count > 1)
+                sender.TabItems.Remove(args.Tab);
+            else if (sender.TabItems.FirstOrDefault() is TabViewItem tab && (string)tab.Header != "New Tab")
+            {
+                sender.TabItems.Remove(args.Tab);
+                CreateNewTab();
+            }
+        }
+        private void CreateNewTab()
+        {
+            TabViewItem newTab = new()
+            {
+                Header = "New Tab",
+                IconSource = new SymbolIconSource() { Symbol = Symbol.Document },
+                Content = new NewTabPage(this)
+            };
+            MainTabView.TabItems.Add(newTab);
+            MainTabView.SelectedItem = newTab;
+        }
+
+        public void OpenItem(string itemName)
+        {
+            var tab = MainTabView.SelectedItem as TabViewItem;
+            MainTabView.TabItems.Remove(tab);
+            if (!MainTabView.TabItems.Any(x => ((TabViewItem)x).Header.ToString() == itemName))
+            {
+                var tabItem = new TabViewItem()
+                {
+                    Header = itemName,
+                    IconSource = new SymbolIconSource() { Symbol = Symbol.ShowResults },
+                    Content = new ItemPage(itemName)
+                };
+                MainTabView.TabItems.Add(tabItem);
+                MainTabView.SelectedItem = tabItem;
+            }
+            else
+            {
+                MainTabView.SelectedItem = MainTabView.TabItems.FirstOrDefault(x => ((TabViewItem)x).Header.ToString() == itemName);
+            }
+        }
+
+        private void CloseTabs_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            MainTabView.TabItems.Clear();
+            CreateNewTab();
         }
     }
 }

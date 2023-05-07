@@ -1,7 +1,4 @@
-﻿<!-- Copyright (c) Microsoft Corporation and Contributors. -->
-<!-- Licensed under the MIT License. -->
-
-<Page
+﻿<Page
     xmlns:sys="using:System"
     x:Class="ItemChecker.Views.Account.InfoPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -16,7 +13,7 @@
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
         <!--LeftSide-->
-        <Grid Margin="0 0 10 0" MinWidth="500">
+        <Grid Margin="0 5 10 0" MinWidth="500">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -88,33 +85,29 @@
                     </Button>
                 </StackPanel>
             </Grid>
-            <Expander Grid.Row="3" IsExpanded="True" ExpandDirection="Down" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
-                <Expander.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <FontIcon Glyph="&#xE825;" FontSize="16" VerticalAlignment="Center" Margin="5 0 20 0"/>
-                        <TextBlock Text="Currency"/>
-                    </StackPanel>
-                </Expander.Header>
-                <Expander.Content>
-                    <Grid>
-                        <StackPanel>
-                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}">
+            <Grid Grid.Row="3" CornerRadius="{ThemeResource ControlCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderThickness="1"
+                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Padding="10" HorizontalAlignment="Stretch" MinHeight="48">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <FontIcon Glyph="&#xE825;" FontSize="16" VerticalAlignment="Center" Margin="10 0 20 0"/>
+                <StackPanel VerticalAlignment="Center" Grid.Column="1" HorizontalAlignment="Stretch" Margin="0,0,16,0">
+                    <TextBlock Text="Currency" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
                             You must select the currency of your steam
                             <Hyperlink NavigateUri="https://store.steampowered.com/account/">account.</Hyperlink>
-                            </TextBlock>
-                            <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Left">
+                    </TextBlock>
+                    <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Left">
                             Learn more about supported
                             <Hyperlink NavigateUri="https://partner.steamgames.com/doc/store/pricing/currencies">currencies.</Hyperlink>
-                            </TextBlock>
-                        </StackPanel>
-                        <ComboBox Grid.Column="2" Width="100" HorizontalAlignment="Right" SelectedIndex="0">
-                            <ComboBox.Items>
-                                <ComboBoxItem Content="USD ($)"/>
-                            </ComboBox.Items>
-                        </ComboBox>
-                    </Grid>
-                </Expander.Content>
-            </Expander>
+                    </TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Grid.Column="2" HorizontalAlignment="Stretch">
+                    <TextBlock Text="RUB (₽)" VerticalAlignment="Center" TextAlignment="Right" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                </StackPanel>
+            </Grid>
         </Grid>
         <!--RightSide-->
         <Grid Grid.Column="1" >

@@ -62,8 +62,8 @@ namespace ItemChecker.Views
 
         private void HyperlinkButton_Click(object sender, RoutedEventArgs e)
         {
-            var win = (MainWindow)App.MainWindow;
-            win.NavigateToItemBasePage();
+            //var win = (MainWindow)App.MainWindow;
+            //win.NavigateToItemBasePage();
         }
     }
 }

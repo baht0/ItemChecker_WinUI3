@@ -1,6 +1,3 @@
-<!-- Copyright (c) Microsoft Corporation and Contributors. -->
-<!-- Licensed under the MIT License. -->
-
 <Page
     x:Class="ItemChecker.Views.AccountPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -13,8 +10,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
     <Grid>
-        <Pivot Margin="0 0 0 0">
-            <PivotItem Header="Information" Margin="10 10 10 0">
+        <Pivot Margin="-5 0 0 0">
+            <PivotItem Header="Information">
                 <local:InfoPage/>
             </PivotItem>
             <PivotItem Header="Inventory">

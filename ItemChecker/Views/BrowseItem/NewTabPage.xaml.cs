@@ -1,16 +1,20 @@
 ﻿using System.Linq;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 
 namespace ItemChecker.Views.BrowseItem
 {
     public sealed partial class NewTabPage : Page
     {
+        BrowseItemPage BrowsePage;
+        bool IsSuggestionChosen = false;
         ObservableCollection<string> appBaseList = new();
-        public NewTabPage()
+        public NewTabPage(object page)
         {
             this.InitializeComponent();
+
+            BrowsePage = page as BrowseItemPage;
 
             appBaseList.Add($"AK-47 | Neon Revolution (Field-Tested)");
             appBaseList.Add($"AK-47 | Slate (Field-Tested)");
@@ -28,7 +32,7 @@ namespace ItemChecker.Views.BrowseItem
 
         private void searchSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            if (args.CheckCurrent())
+            if (args.CheckCurrent() && !IsSuggestionChosen)
             {
                 var term = sender.Text.ToLower();
                 var results = appBaseList.Where(i => i.ToLower().Contains(term)).ToList();
@@ -36,19 +40,20 @@ namespace ItemChecker.Views.BrowseItem
                 searchSuggest.IsSuggestionListOpen = true;
             }
         }
-
         private void searchSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
-            var term = args.QueryText.ToLower();
-            var results = appBaseList.Where(i => i.ToLower().Contains(term)).ToList();
-            searchSuggest.ItemsSource = results;
-            searchSuggest.IsSuggestionListOpen = true;
+            if (!IsSuggestionChosen)
+            {
+                var term = args.QueryText.ToLower();
+                var results = appBaseList.Where(i => i.ToLower().Contains(term)).ToList();
+                searchSuggest.ItemsSource = results;
+                searchSuggest.IsSuggestionListOpen = true;
+            }
         }
-
         private void searchSuggest_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
         {
-            searchSuggest.IsSuggestionListOpen = false;
-            searchSuggest.Text = args.SelectedItem as string;
+            IsSuggestionChosen = true;
+            BrowsePage.OpenItem(args.SelectedItem as string);
         }
     }
 }

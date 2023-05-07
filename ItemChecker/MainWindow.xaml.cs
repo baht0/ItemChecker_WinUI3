@@ -5,8 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using System;
-using System.Linq;
-using Windows.ApplicationModel;
+using System.Runtime.InteropServices;
 
 namespace ItemChecker
 {
@@ -15,9 +14,7 @@ namespace ItemChecker
         public MainWindow()
         {
             this.InitializeComponent();
-
-            if (!MicaController.IsSupported())
-                MainGrid.Background = Application.Current.Resources["ApplicationPageBackgroundThemeBrush"] as SolidColorBrush;
+            SetWinMinSize();
 
             if (AppWindowTitleBar.IsCustomizationSupported())
             {
@@ -29,19 +26,24 @@ namespace ItemChecker
                 TitleBar.Visibility = Visibility.Collapsed;
                 MainGrid.RowDefinitions.Remove(TitleRow);
             }
-
-            NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().First();
-            ContentFrame.Navigate(typeof(ParserPage));
         }
 
-        public string GetAppTitleFromSystem()
+        public void StartUpCompletion()
         {
-            return Package.Current.DisplayName;
-            //return Title;
-        }
-        public void NavigateToItemBasePage()
-        {
-            ContentFrame.Navigate(typeof(ItemBasePage));
+            if (AppWindowTitleBar.IsCustomizationSupported())
+            {
+                Logo.Visibility = Visibility.Visible;
+                LogoLabel.Visibility = Visibility.Visible;
+            }
+            if (MicaController.IsSupported())
+            {
+                MainGrid.Background = null;
+                this.SystemBackdrop = new MicaBackdrop();
+            }
+            MainGrid.Children.Remove(StartUp);
+            var navigationPage = new NavigationPage();
+            MainGrid.Children.Add(navigationPage);
+            Grid.SetRow(navigationPage, 1);
         }
 
         public async void ExitShowDialogAsync()
@@ -59,8 +61,8 @@ namespace ItemChecker
                     Text = "Do you really want to quit?"
                 }
             };
-            var result = await dialog.ShowAsync();
 
+            var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
             {
                 App.HandleClosedEvents = false;
@@ -72,44 +74,50 @@ namespace ItemChecker
             ExitShowDialogAsync();
         }
 
-        private void NavigationViewControl_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+        #region WindowSize
+        IntPtr hWnd = IntPtr.Zero;
+        private SUBCLASSPROC SubClassDelegate;
+        public void SetWinMinSize()
         {
-            if (args.IsSettingsInvoked == true)
-            {
-                ContentFrame.Navigate(typeof(SettingsPage), null, args.RecommendedNavigationTransitionInfo);
-            }
-            else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
-            {
-                Type newPage = Type.GetType(args.InvokedItemContainer.Tag.ToString());
-                ContentFrame.Navigate(newPage, args.RecommendedNavigationTransitionInfo);
-            }
+            hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            SubClassDelegate = new SUBCLASSPROC(WindowSubClass);
+            bool bReturn = SetWindowSubclass(hWnd, SubClassDelegate, 0, 0);
         }
-        private void ContentFrame_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+        private int WindowSubClass(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam, IntPtr uIdSubclass, uint dwRefData)
         {
-            NavigationViewControl.IsBackEnabled = ContentFrame.CanGoBack;
-
-            if (ContentFrame.SourcePageType == typeof(SettingsPage))
+            switch (uMsg)
             {
-                NavigationViewControl.SelectedItem = (NavigationViewItem)NavigationViewControl.SettingsItem;
-                NavigationViewControl.Header = ((NavigationViewItem)NavigationViewControl.SelectedItem)?.Content?.ToString();
+                case WM_GETMINMAXINFO:
+                    {
+                        MINMAXINFO mmi = (MINMAXINFO)Marshal.PtrToStructure(lParam, typeof(MINMAXINFO));
+                        mmi.ptMinTrackSize.X = 1000;
+                        mmi.ptMinTrackSize.Y = 500;
+                        Marshal.StructureToPtr(mmi, lParam, false);
+                        return 0;
+                    }
             }
-            else if (ContentFrame.SourcePageType == typeof(AccountPage))
-            {
-                NavigationViewControl.SelectedItem = NavigationViewControl.FooterMenuItems.OfType<NavigationViewItem>().First();
-                ContentFrame.Navigate(typeof(AccountPage));
-                NavigationViewControl.Header = "Account";
-            }
-            else if (ContentFrame.SourcePageType != null)
-            {
-                NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>()
-                    .FirstOrDefault(n => n.Tag.Equals(ContentFrame.SourcePageType.FullName.ToString()));
-                NavigationViewControl.Header = ((NavigationViewItem)NavigationViewControl.SelectedItem)?.Content?.ToString();
-            }
+            return DefSubclassProc(hWnd, uMsg, wParam, lParam);
         }
 
-        private void calculatorNavViewItem_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+
+        public delegate int SUBCLASSPROC(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam, IntPtr uIdSubclass, uint dwRefData);
+
+        [DllImport("Comctl32.dll", SetLastError = true)]
+        public static extern bool SetWindowSubclass(IntPtr hWnd, SUBCLASSPROC pfnSubclass, uint uIdSubclass, uint dwRefData);
+
+        [DllImport("Comctl32.dll", SetLastError = true)]
+        public static extern int DefSubclassProc(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam);
+
+        public const int WM_GETMINMAXINFO = 0x0024;
+
+        public struct MINMAXINFO
         {
-            calculatorTeachingTip.IsOpen = !calculatorTeachingTip.IsOpen;
+            public System.Drawing.Point ptReserved;
+            public System.Drawing.Point ptMaxSize;
+            public System.Drawing.Point ptMaxPosition;
+            public System.Drawing.Point ptMinTrackSize;
+            public System.Drawing.Point ptMaxTrackSize;
         }
+        #endregion
     }
 }

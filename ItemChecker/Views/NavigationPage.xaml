@@ -1,0 +1,173 @@
+<Page
+    x:Class="ItemChecker.Views.NavigationPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ItemChecker.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" KeyDown="Page_KeyDown">
+    <Grid x:Name="MainGrid">
+        <NavigationView x:Name="NavigationViewControl" OpenPaneLength="230" AlwaysShowHeader="True"
+                        IsTitleBarAutoPaddingEnabled="False" IsTabStop="False" IsBackButtonVisible="Collapsed" ItemInvoked="NavigationViewControl_ItemInvoked">
+            <NavigationView.HeaderTemplate>
+                <DataTemplate>
+                    <StackPanel x:Name="pageTitle" Background="Transparent" Height="45" VerticalAlignment="Top">
+                        <TextBlock Style="{StaticResource TitleTextBlockStyle}" FontSize="24" VerticalAlignment="Center" Text="{Binding}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </NavigationView.HeaderTemplate>
+            <NavigationView.MenuItems>
+                <NavigationViewItemHeader Content="Main Tables"/>
+                <NavigationViewItem Content="Parser" Tag="ItemChecker.Views.ParserPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xf6fa;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Buy Orders" Tag="ItemChecker.Views.BuyOrdersPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEAFC;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Rare" Tag="ItemChecker.Views.RarePage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xf4a5;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItemHeader Content="Other"/>
+                <NavigationViewItem Content="Browse Item" Tag="ItemChecker.Views.BrowseItemPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE721;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Item Base" Tag="ItemChecker.Views.ItemBasePage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8FD;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Icon="Calculator" Content="Calculator" x:Name="calculatorNavViewItem" SelectsOnInvoked="False" Tapped="calculatorNavViewItem_Tapped"/>
+            </NavigationView.MenuItems>
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem HorizontalAlignment="Left" Tag="ItemChecker.Views.AccountPage">
+                    <NavigationViewItem.Content>
+                        <StackPanel Orientation="Horizontal" Width="230">
+                            <PersonPicture ProfilePicture="https://avatars.akamai.steamstatic.com/7a0e6290c1769bd6ec6a438a6f7e37c0cac8f601_medium.jpg" Height="22"/>
+                            <TextBlock Text="Account" VerticalAlignment="Center" Margin="10 0 0 0"/>
+                        </StackPanel>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
+            <Frame x:Name="ContentFrame" Margin="50 0 20 10" Navigated="ContentFrame_Navigated"/>
+        </NavigationView>
+        <!--Calculator-->
+        <TeachingTip x:Name="calculatorTeachingTip" Title="Calculator" PreferredPlacement="LeftBottom" Width="500">
+            <TeachingTip.Content>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <!--Compare-->
+                    <Grid Grid.Row="0" Margin="0 15 0 0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Row="0" Grid.ColumnSpan="3">
+                            <TextBlock Text="Compare" Style="{StaticResource BaseTextBlockStyle}"/>
+                            <NavigationViewItemSeparator VerticalAlignment="Bottom" Grid.Row="1"/>
+                        </StackPanel>
+
+                        <NumberBox PlaceholderText="Purchase" Grid.Row="1" Minimum="0" SpinButtonPlacementMode="Compact" Margin="0 5 0 0"/>
+                        <NumberBox PlaceholderText="Price" Grid.Row="2" Minimum="0" SpinButtonPlacementMode="Compact" Margin="0 5 0 0"/>
+
+                        <ComboBox HorizontalAlignment="Stretch" SelectedIndex="0" Grid.Row="1" Grid.Column="2" Margin="0 5 0 0">
+                            <ComboBox.Items>
+                                <ComboBoxItem Content="SteamMarket"/>
+                                <ComboBoxItem Content="CsMoney"/>
+                                <ComboBoxItem Content="LootFarm"/>
+                                <ComboBoxItem Content="Buff163"/>
+                            </ComboBox.Items>
+                        </ComboBox>
+                        <NumberBox PlaceholderText="Commission" Grid.Row="2" Grid.Column="2" SpinButtonPlacementMode="Compact" Minimum="0" Maximum="99" Margin="0 5 0 0"/>
+
+                        <Expander Grid.Row="3" Grid.ColumnSpan="3" ExpandDirection="Up" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="0 5 0 0">
+                            <Expander.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <FontIcon Glyph="&#xE8BC;" FontSize="16" VerticalAlignment="Center" Margin="5 0 20 0"/>
+                                    <TextBlock Text="Result compare"/>
+                                </StackPanel>
+                            </Expander.Header>
+                            <Expander.Content>
+                                <Grid>
+                                    <StackPanel HorizontalAlignment="Left">
+                                        <TextBlock Grid.Row="0" Text="Get:"/>
+                                        <TextBlock Grid.Row="1" Text="Difference:"/>
+                                        <TextBlock Grid.Row="2" Text="Precent:"/>
+                                    </StackPanel>
+                                    <StackPanel HorizontalAlignment="Right">
+                                        <TextBlock Grid.Row="0" Text="814.87" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="1" Text="445.21"  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="2" Text="46.78%" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Expander.Content>
+                        </Expander>
+                    </Grid>
+                    <!--Currency-->
+                    <Grid Grid.Row="1" Margin="0 5 0 0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Row="0" Grid.ColumnSpan="3">
+                            <TextBlock Text="Currency" Style="{StaticResource BaseTextBlockStyle}"/>
+                            <NavigationViewItemSeparator VerticalAlignment="Bottom" Grid.Row="1"/>
+                        </StackPanel>
+
+                        <ComboBox HorizontalAlignment="Stretch" SelectedIndex="0" Grid.Row="1" Margin="0 5 0 0">
+                            <ComboBox.Items>
+                                <ComboBoxItem Content="USD ($)"/>
+                                <ComboBoxItem Content="RUB ()"/>
+                                <ComboBoxItem Content="CNY ()"/>
+                            </ComboBox.Items>
+                        </ComboBox>
+                        <NumberBox PlaceholderText="Value" Grid.Row="2" Minimum="0" SpinButtonPlacementMode="Compact" Margin="0 5 0 0"/>
+
+                        <Button Grid.Row="1" Grid.Column="1" Width="40" Margin="10 0 10 0">
+                            <Button.Content>
+                                <FontIcon Glyph="&#xE8AB;" FontSize="15"/>
+                            </Button.Content>
+                        </Button>
+
+                        <ComboBox HorizontalAlignment="Stretch" SelectedIndex="0" Grid.Row="1" Grid.Column="2" Margin="0 5 0 0">
+                            <ComboBox.Items>
+                                <ComboBoxItem Content="USD ($)"/>
+                                <ComboBoxItem Content="RUB ()"/>
+                                <ComboBoxItem Content="CNY ()"/>
+                            </ComboBox.Items>
+                        </ComboBox>
+                        <TextBlock Text="83.01" VerticalAlignment="Center" FontWeight="Bold" Grid.Row="2" Grid.Column="2" Margin="0 5 0 0"/>
+                    </Grid>
+                </Grid>
+            </TeachingTip.Content>
+        </TeachingTip>
+    </Grid>
+</Page>

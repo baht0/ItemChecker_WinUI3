@@ -89,7 +89,7 @@
             <AppBarButton Label="Parse" Icon="Play" Click="Check_Click"/>
             <AppBarButton Label="Continue">
                 <AppBarButton.Icon>
-                    <FontIcon Glyph="&#xE9F3;"/>
+                    <FontIcon Glyph="&#xEF3B;"/>
                 </AppBarButton.Icon>
             </AppBarButton>
             <AppBarButton Label="Import" Click="Import_Click">
