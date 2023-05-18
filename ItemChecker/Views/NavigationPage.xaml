@@ -3,9 +3,10 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ItemChecker.Views"
+    xmlns:viewmodel="using:ItemChecker.ViewModels"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" KeyDown="Page_KeyDown">
+    mc:Ignorable="d">
     <Grid x:Name="MainGrid">
         <NavigationView x:Name="NavigationViewControl" OpenPaneLength="230" AlwaysShowHeader="True"
                         IsTitleBarAutoPaddingEnabled="False" IsTabStop="False" IsBackButtonVisible="Collapsed" ItemInvoked="NavigationViewControl_ItemInvoked">
@@ -47,13 +48,10 @@
                 <NavigationViewItem Icon="Calculator" Content="Calculator" x:Name="calculatorNavViewItem" SelectsOnInvoked="False" Tapped="calculatorNavViewItem_Tapped"/>
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
-                <NavigationViewItem HorizontalAlignment="Left" Tag="ItemChecker.Views.AccountPage">
-                    <NavigationViewItem.Content>
-                        <StackPanel Orientation="Horizontal" Width="230">
-                            <PersonPicture ProfilePicture="https://avatars.akamai.steamstatic.com/7a0e6290c1769bd6ec6a438a6f7e37c0cac8f601_medium.jpg" Height="22"/>
-                            <TextBlock Text="Account" VerticalAlignment="Center" Margin="10 0 0 0"/>
-                        </StackPanel>
-                    </NavigationViewItem.Content>
+                <NavigationViewItem Content="Account" Tag="ItemChecker.Views.AccountPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE779;"/>
+                    </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.FooterMenuItems>
             <Frame x:Name="ContentFrame" Margin="50 0 20 10" Navigated="ContentFrame_Navigated"/>

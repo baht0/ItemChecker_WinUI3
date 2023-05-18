@@ -11,39 +11,32 @@ namespace ItemChecker
 {
     public partial class MainWindow : Window
     {
+        readonly NavigationPage NavigationPage = new();
         public MainWindow()
         {
             this.InitializeComponent();
             SetWinMinSize();
 
+            if (MicaController.IsSupported())
+                this.SystemBackdrop = new MicaBackdrop();
             if (AppWindowTitleBar.IsCustomizationSupported())
             {
                 ExtendsContentIntoTitleBar = true;
                 SetTitleBar(TitleBar);
             }
             else
-            {
-                TitleBar.Visibility = Visibility.Collapsed;
-                MainGrid.RowDefinitions.Remove(TitleRow);
-            }
+                MainGrid.Children.Remove(TitleBar);
         }
 
         public void StartUpCompletion()
         {
             if (AppWindowTitleBar.IsCustomizationSupported())
-            {
                 Logo.Visibility = Visibility.Visible;
-                LogoLabel.Visibility = Visibility.Visible;
-            }
             if (MicaController.IsSupported())
-            {
                 MainGrid.Background = null;
-                this.SystemBackdrop = new MicaBackdrop();
-            }
-            MainGrid.Children.Remove(StartUp);
-            var navigationPage = new NavigationPage();
-            MainGrid.Children.Add(navigationPage);
-            Grid.SetRow(navigationPage, 1);
+
+            ContentGrid.Children.Clear();
+            ContentGrid.Children.Add(NavigationPage);
         }
 
         public async void ExitShowDialogAsync()
@@ -119,5 +112,11 @@ namespace ItemChecker
             public System.Drawing.Point ptMaxTrackSize;
         }
         #endregion
+
+        private void MainGrid_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Escape)
+                ExitShowDialogAsync();
+        }
     }
 }

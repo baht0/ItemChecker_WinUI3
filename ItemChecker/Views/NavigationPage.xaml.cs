@@ -1,7 +1,4 @@
-using Microsoft.UI.Composition.SystemBackdrops;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using System;
 using System.Linq;
 
@@ -12,9 +9,6 @@ namespace ItemChecker.Views
         public NavigationPage()
         {
             this.InitializeComponent();
-
-            if (!MicaController.IsSupported())
-                this.Background = Application.Current.Resources["ApplicationPageBackgroundThemeBrush"] as SolidColorBrush;
 
             NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().First();
             ContentFrame.Navigate(typeof(ParserPage));
@@ -62,15 +56,6 @@ namespace ItemChecker.Views
         private void calculatorNavViewItem_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
             calculatorTeachingTip.IsOpen = !calculatorTeachingTip.IsOpen;
-        }
-
-        private void Page_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
-        {
-            if (e.Key == Windows.System.VirtualKey.Escape)
-            {
-                var win = (MainWindow)App.MainWindow;
-                win.ExitShowDialogAsync();
-            }
         }
     }
 }

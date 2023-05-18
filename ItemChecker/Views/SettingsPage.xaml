@@ -48,7 +48,7 @@
             <StackPanel VerticalAlignment="Center" Grid.Column="1" HorizontalAlignment="Stretch" Margin="0,0,16,0">
                 <TextBlock Text="Transparency effects" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
             </StackPanel>
-            <ToggleSwitch Grid.Column="2" HorizontalAlignment="Left" Margin="0 0 -80 0" IsOn="{Binding MicaTheme}" IsEnabled="{Binding IsMicaSupported}" VerticalAlignment="Top"/>
+            <ToggleSwitch Grid.Column="2" HorizontalAlignment="Left" Margin="0 0 -80 0" IsOn="{Binding IsMicaTheme}" IsEnabled="{Binding IsMicaSupported}" VerticalAlignment="Top"/>
         </Grid>
         <Expander Grid.Row="2" IsExpanded="False" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
             <Expander.Header>

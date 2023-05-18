@@ -1,42 +1,21 @@
-﻿using ItemChecker.Core;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Composition.SystemBackdrops;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ItemChecker.ViewModels
 {
-    internal class SettingsViewModel : ObservableObject
+    public class SettingsViewModel : ObservableObject
     {
-        public bool MicaTheme
-        {
-            get
-            { 
-                return _isMicaSupported;
-            }
-            set
-            {
-                _micaTheme = value;
-                OnPropertyChanged();
-            }
-        }
-        bool _micaTheme = true;
         public bool IsMicaSupported
         {
-            get
-            {
-                return _isMicaSupported;
-            }
-            set
-            {
-                _isMicaSupported = value;
-                OnPropertyChanged();
-            }
+            get => _isMicaSupported;
+            set => SetProperty(ref _isMicaSupported, value);
         }
         bool _isMicaSupported = MicaController.IsSupported();
+        public bool IsMicaTheme
+        {
+            get => _isMicaTheme;
+            set => SetProperty(ref _isMicaTheme, value);
+        }
+        bool _isMicaTheme = true;
     }
 }

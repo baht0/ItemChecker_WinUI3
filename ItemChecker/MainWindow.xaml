@@ -7,17 +7,21 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d" Closed="Window_Closed">
-    <Grid x:Name="MainGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid x:Name="MainGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" KeyDown="MainGrid_KeyDown">
         <Grid.RowDefinitions>
-            <RowDefinition Height="35" x:Name="TitleRow"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <!--TitleBar-->
-        <StackPanel x:Name="TitleBar" Orientation="Horizontal" Margin="15 0 0 0">
-            <Image x:Name="Logo" Source="/Assets/icon.ico" Height="20" VerticalAlignment="Center" Visibility="Collapsed"/>
-            <TextBlock x:Name="LogoLabel" Text="ItemChecker" Margin="15 0 0 0" VerticalAlignment="Center" Visibility="Collapsed" Style="{StaticResource CaptionTextBlockStyle}"/>
-        </StackPanel>
+        <Grid x:Name="TitleBar" HorizontalAlignment="Stretch" Margin="15 0 0 0" Height="35">
+            <StackPanel x:Name="Logo" Orientation="Horizontal" Visibility="Collapsed">
+                <Image Source="/Assets/icon.ico" Height="20" VerticalAlignment="Center"/>
+                <TextBlock Text="ItemChecker" Margin="15 0 0 0" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}"/>
+            </StackPanel>
+        </Grid>
         <!--Content-->
-        <views:StartUpPage x:Name="StartUp" Grid.Row="1"/>
+        <Grid x:Name="ContentGrid" Grid.Row="1">
+            <views:StartUpPage/>
+        </Grid>
     </Grid>
 </Window>
