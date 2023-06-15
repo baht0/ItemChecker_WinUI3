@@ -32,39 +32,39 @@ namespace ItemChecker.Support
             OpenUrl(url);
         }
 
-        public static decimal GetDecimal(string str)
+        public static double GetDouble(string str)
         {
-            var mat = Regex.Match(str, @"(\d+(\.\d+)?)|(\.\d+)").Value;
-            return Convert.ToDecimal(mat, CultureInfo.InvariantCulture);
+            var mat = Regex.Match(str, @"([0-9]+(?:[.,][0-9]+)?)").Value.Replace(",", ".");
+            return Convert.ToDouble(mat, CultureInfo.InvariantCulture);
         }
-        public static decimal SteamAvgPrice(string itemName, JObject items)
+        public static double SteamAvgPrice(string itemName, JObject items)
         {
             itemName = itemName.Replace("'", "&#39");
             var item = items[itemName] as JObject;
             if (item != null && item["price"] != null)
             {
                 var price = item["price"];
-                decimal value;
-                if (price["24_hours"] != null && decimal.TryParse((string)price["24_hours"]["average"], out value) && value != 0)
+                double value;
+                if (price["24_hours"] != null && double.TryParse((string)price["24_hours"]["average"], out value) && value != 0)
                     return value;
-                else if (price["7_days"] != null && decimal.TryParse((string)price["7_days"]["average"], out value) && value != 0)
+                else if (price["7_days"] != null && double.TryParse((string)price["7_days"]["average"], out value) && value != 0)
                     return value;
-                else if (price["30_days"] != null && decimal.TryParse((string)price["30_days"]["average"], out value) && value != 0)
+                else if (price["30_days"] != null && double.TryParse((string)price["30_days"]["average"], out value) && value != 0)
                     return value;
-                else if (price["all_time"] != null && decimal.TryParse((string)price["all_time"]["average"], out value) && value != 0)
+                else if (price["all_time"] != null && double.TryParse((string)price["all_time"]["average"], out value) && value != 0)
                     return value;
             }
             return 0;
         }
 
-        public static decimal Precent(decimal a, decimal b) //from A to B
+        public static double Precent(double a, double b) //from A to B
         {
             if (a != 0)
                 return Math.Round((b - a) / a * 100, 2);
             else
                 return 0;
         }
-        public static decimal Difference(decimal a, decimal b)
+        public static double Difference(double a, double b)
         {
             return Math.Round(a - b, 2);
         }
