@@ -3,7 +3,6 @@ using ItemChecker.Net.Session;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
 
 namespace ItemChecker.Net
 {
@@ -30,12 +29,12 @@ namespace ItemChecker.Net
             internal static DateTime ifModifiedSince { get; set; } = DateTime.Now.ToUniversalTime();
 
             public static async Task<string> RequestAsync(string url) => await RequestGetAsync(url, Cookies);
-            public static async Task<decimal> BalanceAsync()
+            public static async Task<double> BalanceAsync()
             {
                 var html = await RequestAsync("https://steamcommunity.com/market/");
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
-                return GetDecimal(htmlDoc.DocumentNode.SelectSingleNode("//a[@id='header_wallet_balance']").InnerText);
+                return GetDouble(htmlDoc.DocumentNode.SelectSingleNode("//a[@id='header_wallet_balance']").InnerText);
             }
             public static async Task<string> ApiKeyAsync()
             {
@@ -109,7 +108,7 @@ namespace ItemChecker.Net
         }
         public class Post : Helpers
         {
-            static HttpResponseMessage Request(string url, string referer, Dictionary<string, string> args)
+            static async Task<HttpResponseMessage> RequestAsync(string url, string referer, Dictionary<string, string> args)
             {
                 Uri uriAddress = new(url);
                 uriAddress = new($"https://{uriAddress.Host}");
@@ -120,28 +119,29 @@ namespace ItemChecker.Net
                 headers.Add("User-Agent", UserAgent);
                 headers.Add("Cookie", Cookies.GetCookieHeader(uriAddress));
 
-                return RequestPostAsync(url, args, headers).Result;
+                return await RequestPostAsync(url, args, headers);
             }
 
-            public static HttpResponseMessage CreateBuyOrder(string itemName, decimal highest_buy_order, int currencyId)
+            public static async Task<HttpResponseMessage> CreateBuyOrder(string itemName, double highest_buy_order, int count, int currencyId)
             {
                 string market_hash_name = Uri.EscapeDataString(itemName);
                 Dictionary<string, string> args = new()
                 {
                     {"sessionid", SessionId.Value},
                     {"currency", currencyId.ToString()},
+                    {"appid", "730"},
                     {"market_hash_name", market_hash_name},
                     {"price_total", ((int)(highest_buy_order * 100 + 1)).ToString()},
-                    {"quantity", "1"},
+                    {"quantity", count.ToString()},
                     {"billing_state", string.Empty},
                     {"save_my_address", "0"},
                 };
                 string url = "https://steamcommunity.com/market/createbuyorder/";
                 string referer = "https://steamcommunity.com/market/listings/730/" + market_hash_name;
 
-                return Request(url, referer, args);
+                return await RequestAsync(url, referer, args);
             }
-            public static HttpResponseMessage CancelBuyOrder(string itemName, string buyOrderId)
+            public static async Task<HttpResponseMessage> CancelBuyOrder(string itemName, string buyOrderId)
             {
                 string market_hash_name = Uri.EscapeDataString(itemName);
                 Dictionary<string, string> args = new()
@@ -153,9 +153,9 @@ namespace ItemChecker.Net
                 string url = "https://steamcommunity.com/market/cancelbuyorder/";
                 string referer = "https://steamcommunity.com/market/listings/730/" + market_hash_name;
 
-                return Request(url, referer, args);
+                return await RequestAsync(url, referer, args);
             }
-            public static HttpResponseMessage BuyListing(string itemName, string listingId, decimal fee, decimal subtotal, decimal total, int currencyId)
+            public static async Task<HttpResponseMessage> BuyListing(string itemName, string listingId, double fee, double subtotal, double total, int currencyId)
             {
                 string market_hash_name = Uri.EscapeDataString(itemName);
                 Dictionary<string, string> args = new()
@@ -180,10 +180,10 @@ namespace ItemChecker.Net
                 string url = "https://steamcommunity.com/market/buylisting/" + listingId;
                 string referer = "https://steamcommunity.com/market/listings/730/" + market_hash_name;
 
-                return Request(url, referer, args);
+                return await RequestAsync(url, referer, args);
             }
 
-            public static HttpResponseMessage SellItem(string assetId, int price)
+            public static async Task<HttpResponseMessage> SellItem(string assetId, int price)
             {
                 Dictionary<string, string> args = new()
                 {
@@ -197,9 +197,9 @@ namespace ItemChecker.Net
                 string url = "https://steamcommunity.com/market/sellitem/";
                 string referer = "https://steamcommunity.com/my/inventory/";
 
-                return Request(url, referer, args);
+                return await RequestAsync(url, referer, args);
             }
-            public static HttpResponseMessage AcceptTrade(string tradeOfferId, string partnerId)
+            public static async Task<HttpResponseMessage> AcceptTrade(string tradeOfferId, string partnerId)
             {
                 Dictionary<string, string> args = new()
                 {
@@ -213,7 +213,7 @@ namespace ItemChecker.Net
                 string url = "https://steamcommunity.com/tradeoffer/" + tradeOfferId + "/accept";
                 string referer = "https://steamcommunity.com/tradeoffer/" + tradeOfferId;
 
-                return Request(url, referer, args);
+                return await RequestAsync(url, referer, args);
             }
         }
         public class Session : Helpers

@@ -8,7 +8,7 @@ namespace ItemChecker.Net
     {
         public static async Task<JObject?> InspectLinkDetails(string link)
         {
-            string json = await RequestGetAsync(@"https://api.csgofloat.com/?url=" + link);
+            string json = await RequestGetAsync("https://api.csgofloat.com/?url=" + link);
             return JObject.Parse(json)["iteminfo"] as JObject;
         }
 
@@ -75,6 +75,23 @@ namespace ItemChecker.Net
                     return JObject.Parse(json)["items"] as JArray;
                 }
 
+                public static async Task<string> ItemWiki(string itemName)
+                {
+                    string market_hash_name = Uri.EscapeDataString(itemName);
+                    var html = await RequestGetAsync("https://wiki.cs.money/search?q=" + market_hash_name);
+                    HtmlDocument htmlDoc = new();
+                    htmlDoc.LoadHtml(html);
+                    var item = htmlDoc.DocumentNode.SelectSingleNode("/html/body/div[1]/div[2]/div[2]/div/div[1]/div/div/div/a");
+                    if (item != null)
+                    {
+                        html = await RequestGetAsync("https://wiki.cs.money" + item.Attributes["href"].Value);
+                        htmlDoc.LoadHtml(html);
+                        var prices = htmlDoc.DocumentNode.SelectSingleNode("/html/body/div[1]/div[2]/div[2]/div/div[1]/div[2]/div[3]/div[2]/table/tbody");
+                    }
+
+                    return null;
+                }
+
                 public static async Task<JArray> InventoryItemsAsync()
                 {
                     string json = await RequestAsync("https://cs.money/3.0/load_user_inventory/730?isPrime=false&limit=60&noCache=true&offset=0&order=desc&sort=price&withStack=true");
@@ -82,7 +99,7 @@ namespace ItemChecker.Net
                     return obj.ContainsKey("items") ? JArray.Parse(obj["items"].ToString()) : new();
                 }
 
-                public static async Task<decimal> BalanceAsync()
+                public static async Task<double> BalanceAsync()
                 {
                     try
                     {
@@ -94,7 +111,7 @@ namespace ItemChecker.Net
                         htmlDoc.LoadHtml(html);
                         string market = htmlDoc.DocumentNode.SelectSingleNode("/html/body/div[1]/div/div/div[2]/div[1]/div/div[6]/div[1]/div[2]/div/div[1]/span[2]").InnerText;
 
-                        return GetDecimal(market) + GetDecimal(trade);
+                        return GetDouble(market) + GetDouble(trade);
                     }
                     catch
                     {
@@ -118,7 +135,7 @@ namespace ItemChecker.Net
                     if (!await Get.IsAuthorizedAsync())
                     {
                         Cookies = await GetCookieAsync("https://auth.dota.trade/login?redirectUrl=https://cs.money/ru/&callbackUrl=https://cs.money/login", "https://cs.money");
-                        SerializeCookieAsync(Cookies, Domain).Wait();
+                        await SerializeCookieAsync(Cookies, Domain);
                     }
                 }
             }
@@ -137,11 +154,11 @@ namespace ItemChecker.Net
                     return obj["result"] as JObject;
                 }
 
-                public static async Task<decimal> BalanceAsync()
+                public static async Task<double> BalanceAsync()
                 {
                     var json = await RequestAsync("https://loot.farm/login_data.php");
                     var balance = Convert.ToInt32(JObject.Parse(json)["balance"]);
-                    return Convert.ToDecimal(balance) / 100;
+                    return Convert.ToDouble(balance) / 100;
                 }
                 internal static async Task<bool> IsAuthorizedAsync()
                 {
@@ -161,7 +178,7 @@ namespace ItemChecker.Net
                     if (!await Get.IsAuthorizedAsync())
                     {
                         Cookies = await GetCookieAsync("https://authsb.trade/lootlogin.php", "https://loot.farm");
-                        SerializeCookieAsync(Cookies, Domain).Wait();
+                        await SerializeCookieAsync(Cookies, Domain);
                     }
                 }
             }
@@ -173,10 +190,10 @@ namespace ItemChecker.Net
             public class Get
             {
                 public static async Task<string> RequestAsync(string url) => await RequestGetAsync(url, Cookies);
-                public static async Task<decimal> BalanceAsync()
+                public static async Task<double> BalanceAsync()
                 {
                     var json = await RequestAsync("https://buff.163.com/api/asset/get_brief_asset/");
-                    var balanceInCny = Convert.ToDecimal(JObject.Parse(json)["data"]["alipay_amount"]);
+                    var balanceInCny = Convert.ToDouble(JObject.Parse(json)["data"]["alipay_amount"]);
                     return balanceInCny;
                 }
 
@@ -204,7 +221,7 @@ namespace ItemChecker.Net
                             Secure = true
                         };
                         Cookies.Add(lan);
-                        SerializeCookieAsync(Cookies, Domain).Wait();
+                        await SerializeCookieAsync(Cookies, Domain);
                     }
                 }
             }

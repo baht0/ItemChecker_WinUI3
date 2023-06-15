@@ -80,10 +80,10 @@ namespace ItemChecker.Net
             return cookieContainer;
         }
 
-        internal static decimal GetDecimal(string str)
+        internal static double GetDouble(string str)
         {
             var mat = Regex.Match(str, @"(\d+(\.\d+)?)|(\.\d+)").Value;
-            return Convert.ToDecimal(mat, CultureInfo.InvariantCulture);
+            return Convert.ToDouble(mat, CultureInfo.InvariantCulture);
         }
     }
 }
