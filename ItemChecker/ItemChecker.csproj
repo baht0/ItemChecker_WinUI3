@@ -15,6 +15,7 @@
     <AssemblyVersion>2.1.0.0</AssemblyVersion>
     <FileVersion>2.1.0.0</FileVersion>
     <IncludePackageReferencesDuringMarkupCompilation>true</IncludePackageReferencesDuringMarkupCompilation>
+    <Nullable>warnings</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <Content Remove="Assets\logo.altform-lightunplated_targetsize-16.png" />
@@ -48,12 +49,12 @@
     <None Remove="Views\Account\InfoPage.xaml" />
     <None Remove="Views\Account\InventoryPage.xaml" />
     <None Remove="Views\Account\Inventory\SellParametersPage.xaml" />
-    <None Remove="Views\BrowseItemPage.xaml" />
-    <None Remove="Views\BrowseItem\ItemPage.xaml" />
-    <None Remove="Views\BrowseItem\NewTabPage.xaml" />
     <None Remove="Views\BuyOrdersPage.xaml" />
     <None Remove="Views\BuyOrders\ParametersPage.xaml" />
-    <None Remove="Views\ItemBasePage.xaml" />
+    <None Remove="Views\CalculatorPage.xaml" />
+    <None Remove="Views\DatabasePage.xaml" />
+    <None Remove="Views\Database\ItemPage.xaml" />
+    <None Remove="Views\Database\NewTabPage.xaml" />
     <None Remove="Views\NavigationPage.xaml" />
     <None Remove="Views\ParserPage.xaml" />
     <None Remove="Views\Parser\ImportPage.xaml" />
@@ -67,10 +68,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.3.230502000" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.3.230602002" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <Manifest Include="$(ApplicationManifest)" />
@@ -89,6 +90,21 @@
     <ProjectReference Include="..\ItemChecker.Support\ItemChecker.Support.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Views\Database\NewTabPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\DatabasePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\CalculatorPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
     <Page Update="Views\StartUp\SignInPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -104,32 +120,12 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\BrowseItem\ItemPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\BrowseItem\NewTabPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\BrowseItemPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
     <Page Update="Views\Parser\PlaceOrderPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Account\Inventory\SellParametersPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\ItemBasePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -185,6 +181,11 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\ParserPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Database\ItemPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

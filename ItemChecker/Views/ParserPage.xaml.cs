@@ -1,42 +1,25 @@
-// Copyright (c) Microsoft Corporation and Contributors.
-// Licensed under the MIT License.
-
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using ItemChecker.Views.Parser;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using ItemChecker.ViewModels;
+using System.Linq;
+using CommunityToolkit.WinUI.UI.Controls;
 
 namespace ItemChecker.Views
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class ParserPage : Page
     {
+        readonly static ParserViewModel ViewModel = new();
         public ParserPage()
         {
             this.InitializeComponent();
+            DataContext = ViewModel;
         }
-        private void Check_Click(object sender, RoutedEventArgs e)
-        {
-            CheckShowDialogAsync();
-        }
+        private void Check_Click(object sender, RoutedEventArgs e) => CheckShowDialogAsync();
         public async void CheckShowDialogAsync()
         {
+            var oldParam = ViewModel.Parameters.Clone();
             var dialog = new ContentDialog()
             {
                 XamlRoot = this.XamlRoot,
@@ -45,48 +28,50 @@ namespace ItemChecker.Views
                 PrimaryButtonText = "Start",
                 CloseButtonText = "Cancel",
                 DefaultButton = ContentDialogButton.Primary,
-                Content = new ParametersPage(),
+                Content = new ParametersPage(ViewModel.Parameters),
             };
             var result = await dialog.ShowAsync();
 
             if (result == ContentDialogResult.Primary)
             {
-                //
+                ImportBtn.IsChecked = false;
+                ImportPage.Visibility = Visibility.Collapsed;
+                ViewModel.StartCommand.Execute(null);
+            }
+            else
+                ViewModel.Parameters = oldParam;
+        }
+        private void ImportBtn_Click(object sender, RoutedEventArgs e) => ImportPage.Visibility = ImportPage.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+
+        private void dataGrid_Sorting(object sender, DataGridColumnEventArgs e)
+        {
+            if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
+            {
+                ViewModel.SortingAscendingCommand.Execute(e.Column.Tag.ToString());
+                e.Column.SortDirection = DataGridSortDirection.Ascending;
+            }
+            else
+            {
+                ViewModel.SortingDescendingCommand.Execute(e.Column.Tag.ToString());
+                e.Column.SortDirection = DataGridSortDirection.Descending;
+            }
+            foreach (var dgColumn in dataGrid.Columns)
+            {
+                if (dgColumn.Tag.ToString() != e.Column.Tag.ToString())
+                {
+                    dgColumn.SortDirection = null;
+                }
             }
         }
-
-        private void Import_Click(object sender, RoutedEventArgs e)
+        private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            ImportShowDialogAsync();
-        }
-        public async void ImportShowDialogAsync()
-        {
-            var dialog = new ContentDialog()
+            if (args.CheckCurrent())
             {
-                XamlRoot = this.XamlRoot,
-                Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
-                Title = "Select",
-                PrimaryButtonText = "Import",
-                CloseButtonText = "Cancel",
-                DefaultButton = ContentDialogButton.Primary,
-                Content = new ImportPage(),
-            };
-            var result = await dialog.ShowAsync();
-
-            if (result == ContentDialogResult.Primary)
-            {
-                //
+                var term = sender.Text.ToLower();
+                var results = ViewModel.Items.Where(i => i.ItemName.ToLower().Contains(term)).ToList();
+                dataGrid.ItemsSource = results;
             }
         }
-
-        private void AdditionalBtn_Click(object sender, RoutedEventArgs e)
-        {
-            FilterTeachingTip.IsOpen = true;
-        }
-
-        private void PlaceOrders_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
+        private void AdditionalBtn_Click(object sender, RoutedEventArgs e) => FilterTeachingTip.IsOpen = true;
     }
 }

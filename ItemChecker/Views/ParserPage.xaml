@@ -1,54 +1,32 @@
-﻿<!-- Copyright (c) Microsoft Corporation and Contributors. -->
-<!-- Licensed under the MIT License. -->
-
-<Page
+﻿<Page
     x:Class="ItemChecker.Views.ParserPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ItemChecker.Views"
+    xmlns:vm="using:ItemChecker.ViewModels"
+    xmlns:conv="using:ItemChecker.Converter"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=vm:ParserViewModel}">
+    <Page.Resources>
+        <conv:BooleanReverseConverter x:Key="BooleanReverseConverter"/>
+        <conv:IsBoughtConverter x:Key="IsBoughtConverter"/>
+    </Page.Resources>
     <Grid>
-        <Grid.Resources>
-            <converters:StringFormatConverter x:Key="StringFormatConverter"/>
-            <!--RowInfo-->
-            <DataTemplate x:Key="RowDetailsTemplate">
-                <StackPanel>
-                    <TextBlock Margin="20" Text="Here are the details for the selected mountain:" />
-                    <Grid Margin="20,10" Padding="5">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Coordinates: " FontWeight="SemiBold" FontSize="13" />
-                        <TextBlock Grid.Row="1" Text="Prominence (m): " FontWeight="SemiBold" FontSize="13" />
-                        <TextBlock Grid.Row="2" Text="First Ascent (year): " FontWeight="SemiBold" FontSize="13" />
-                        <TextBlock Grid.Row="3" Text="No. of ascents: " FontWeight="SemiBold" FontSize="13" />
-                        <TextBlock Grid.Column="1" FontSize="13" Text="{Binding Coordinates}" HorizontalAlignment="Right" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" FontSize="13" Text="{Binding Prominence}" HorizontalAlignment="Right" />
-                        <TextBlock Grid.Row="2" Grid.Column="1" FontSize="13" Text="{Binding First_ascent}" HorizontalAlignment="Right" />
-                        <TextBlock Grid.Row="3" Grid.Column="1" FontSize="13" Text="{Binding Ascents}" HorizontalAlignment="Right" />
-                    </Grid>
-                </StackPanel>
-            </DataTemplate>
-        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <!--TableInfo-->
+        <!--Actions-->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-            <TextBlock Text="Found: 0" FontSize="16" Margin="0 0 10 0" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Found:" FontSize="16" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+                <TextBlock Text="{Binding Items.Count}" FontSize="16" Margin="3 0 4 0" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+            </StackPanel>
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
                 <AppBarSeparator/>
                 <AppBarButton Label="Info">
@@ -56,61 +34,99 @@
                         <FontIcon Glyph="&#xE946;"/>
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
-                        <Flyout>
-                            <Grid Width="180">
+                        <Flyout Placement="Bottom">
+                            <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
                                     <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
                                 </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="50"/>
-                                    <ColumnDefinition/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="Information about the table" Margin="0,0,0,12" Grid.ColumnSpan="2"/>
-                                <TextBlock Grid.Row="1" Text="From:"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" Text="SteamMarket(A)" FontStyle="Italic"/>
-                                <TextBlock Grid.Row="2" Text="To:"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="LootFarm" FontStyle="Italic"/>
-                                <TextBlock Grid.Row="3" Text="Time:"/>
-                                <TextBlock Grid.Row="3" Grid.Column="1" Text="4/5/2023 12:53 PM" FontStyle="Italic"/>
-                                <TextBlock Grid.Row="4" Text="Count:"/>
-                                <TextBlock Grid.Row="4" Grid.Column="1" Text="1496" FontStyle="Italic"/>
+                                <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="Information" Margin="0,0,0,12" Grid.ColumnSpan="2"/>
+                                <ItemsControl Grid.Row="1" ItemsSource="{Binding Info, Mode=TwoWay}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto"/>
+                                                    <ColumnDefinition MinWidth="25"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Key}" Grid.Column="0"/>
+                                                <TextBlock Text="{Binding Value}" Grid.Column="1" HorizontalAlignment="Right" Margin="10 0 0 0" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </Grid>
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
             </CommandBar>
         </StackPanel>
-        <!--Actions-->
         <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Right">
-            <AppBarButton Label="Parse" Icon="Play" Click="Check_Click"/>
-            <AppBarButton Label="Continue">
+            <AppBarButton Icon="Stop" Label="Stop" Command="{Binding StopCommand}" Visibility="{Binding LoadingBar.IsBusy}"/>
+            <AppBarButton Label="Parser" Icon="Play" Click="Check_Click" Visibility="{Binding LoadingBar.IsBusy, Converter={StaticResource BooleanReverseConverter}}"/>
+            <AppBarButton Label="Continue" Command="{Binding ContinueCommand}">
                 <AppBarButton.Icon>
                     <FontIcon Glyph="&#xEF3B;"/>
                 </AppBarButton.Icon>
             </AppBarButton>
-            <AppBarButton Label="Import" Click="Import_Click">
-                <AppBarButton.Icon>
-                    <FontIcon Glyph="&#xE8B5;"/>
-                </AppBarButton.Icon>
-            </AppBarButton>
             <AppBarSeparator/>
-            <AppBarButton Label="Place orders" Click="PlaceOrders_Click">
-                <AppBarButton.Icon>
-                    <FontIcon Glyph="&#xF156;"/>
-                </AppBarButton.Icon>
-            </AppBarButton>
+            <AppBarToggleButton Label="Import" x:Name="ImportBtn" Click="ImportBtn_Click">
+                <AppBarToggleButton.Icon>
+                    <FontIcon Glyph="&#xE8B5;"/>
+                </AppBarToggleButton.Icon>
+            </AppBarToggleButton>
         </CommandBar>
-        <!--DataGrid-->
-        <controls:DataGrid Grid.Row="1" x:Name="dataGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
-                                       HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" AlternatingRowBackground="LightGray" IsEnabled="True"
-                                       AlternatingRowForeground="Black" AreRowDetailsFrozen="True"
+        <!--Body-->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <!--DataGrid-->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.Resources>
+                    <!--RowInfo-->
+                    <DataTemplate x:Key="RowDetailsTemplate">
+                        <StackPanel>
+                            <TextBlock Margin="20" Text="Here are the details for the selected mountain:" />
+                            <Grid Margin="20,10" Padding="5">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Coordinates: " FontWeight="SemiBold" FontSize="13" />
+                                <TextBlock Grid.Row="1" Text="Prominence (m): " FontWeight="SemiBold" FontSize="13" />
+                                <TextBlock Grid.Row="2" Text="First Ascent (year): " FontWeight="SemiBold" FontSize="13" />
+                                <TextBlock Grid.Row="3" Text="No. of ascents: " FontWeight="SemiBold" FontSize="13" />
+                                <TextBlock Grid.Column="1" FontSize="13" Text="{Binding Coordinates}" HorizontalAlignment="Right" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" FontSize="13" Text="{Binding Prominence}" HorizontalAlignment="Right" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" FontSize="13" Text="{Binding First_ascent}" HorizontalAlignment="Right" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" FontSize="13" Text="{Binding Ascents}" HorizontalAlignment="Right" />
+                            </Grid>
+                        </StackPanel>
+                    </DataTemplate>
+                </Grid.Resources>
+                <controls:DataGrid x:Name="dataGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                       HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" AlternatingRowBackground="{ThemeResource SurfaceStrokeColorFlyoutBrush}"
+                                       AlternatingRowForeground="{ThemeResource AppBarItemForegroundThemeBrush}" AreRowDetailsFrozen="True" ItemsSource="{Binding Items}"
                                         AreRowGroupHeadersFrozen="False"
                                         AutoGenerateColumns="False"
-                                        CanUserSortColumns="True"
+                                        CanUserSortColumns="True" Sorting="dataGrid_Sorting"
                                         CanUserReorderColumns="False"
                                         CanUserResizeColumns="False"
                                         ColumnHeaderHeight="32"
@@ -123,111 +139,125 @@
                                         RowDetailsVisibilityMode="VisibleWhenSelected"
                                         SelectionMode="Single"
                                         RowGroupHeaderPropertyNameAlternative="Range">
-            <controls:DataGrid.Columns>
-                <controls:DataGridTextColumn Header="ItemName" Binding="{Binding Rank}" Tag="Rank" MinWidth="320"/>
-                <controls:DataGridTextColumn Header="Purchase" Binding="{Binding Mountain}" Tag="Mountain" />
-                <controls:DataGridTextColumn Header="Price" Binding="{Binding Height_m}" Tag="Height_m" />
-                <controls:DataGridTextColumn Header="Get" Binding="{Binding Range}" Tag="Range" />
-                <controls:DataGridTextColumn Header="Precent" Binding="{Binding Parent_mountain}" Tag="Parent_mountain" />
-                <controls:DataGridTextColumn Header="Difference" Binding="{Binding Parent_mountain}" Tag="First_ascent"/>
-            </controls:DataGrid.Columns>
-        </controls:DataGrid>
-        <Grid Grid.Row="1" Background="Black" Opacity="0.2"/>
-        <InfoBar Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" IsClosable="False"
-                     IsOpen="True" Title="Remaining:" Message="19:02 min.">
-            <ProgressBar Margin="-45 0 0 0" IsIndeterminate="True" Value="50" Maximum="100"/>
-        </InfoBar>
-        <!--Filters-->
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="auto"/>
-            </Grid.ColumnDefinitions>
-            <AutoSuggestBox PlaceholderText="Type a control name" QueryIcon="Find" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
-            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Grid.Column="1">
-                <AppBarButton Icon="Filter" Label="Filter" x:Name="FilterBtn">
-                    <AppBarButton.Flyout>
-                        <MenuFlyout Placement="Bottom">
-                            <MenuFlyoutItem Text="Reset" Icon="Clear"/>
-                            <MenuFlyoutSeparator/>
-                            <MenuFlyoutSubItem Text="Category">
-                                <ToggleMenuFlyoutItem Text="Normal"/>
-                                <ToggleMenuFlyoutItem Text="Souvenir"/>
-                                <ToggleMenuFlyoutItem Text="StatTrak™"/>
-                                <ToggleMenuFlyoutItem Text="★"/>
-                                <ToggleMenuFlyoutItem Text="★ StatTrak™"/>
-                            </MenuFlyoutSubItem>
-                            <MenuFlyoutSubItem Text="Exterior">
-                                <ToggleMenuFlyoutItem Text="Not Painted"/>
-                                <ToggleMenuFlyoutItem Text="Factory New"/>
-                                <ToggleMenuFlyoutItem Text="Minimal Wear"/>
-                                <ToggleMenuFlyoutItem Text="Field-Tested"/>
-                                <ToggleMenuFlyoutItem Text="Well-Worn"/>
-                                <ToggleMenuFlyoutItem Text="Battle-Scarred"/>
-                            </MenuFlyoutSubItem>
-                            <MenuFlyoutSubItem Text="Quality">
-                                <ToggleMenuFlyoutItem Text="Industrial" Foreground="#FF5E98D9"/>
-                                <ToggleMenuFlyoutItem Text="Mil-Spec" Foreground="#FF4B69FF"/>
-                                <ToggleMenuFlyoutItem Text="Restricted" Foreground="#FF8847FF"/>
-                                <ToggleMenuFlyoutItem Text="Classified" Foreground="#FFD32CE6"/>
-                                <ToggleMenuFlyoutItem Text="Covert" Foreground="#FFEB4B4B"/>
-                                <ToggleMenuFlyoutItem Text="Contraband" Foreground="#FFE4AE39"/>
-                            </MenuFlyoutSubItem>
-                            <MenuFlyoutSubItem Text="Types">
-                                <ToggleMenuFlyoutItem Text="Weapon" IsChecked="{Binding Weapon}"/>
-                                <ToggleMenuFlyoutItem Text="Knife" IsChecked="{Binding Knife}"/>
-                                <ToggleMenuFlyoutItem Text="Gloves" IsChecked="{Binding Gloves}"/>
-                                <ToggleMenuFlyoutItem Text="Agent" IsChecked="{Binding Agent}"/>
-                                <ToggleMenuFlyoutItem Text="Sticker" IsChecked="{Binding Sticker}"/>
+                    <controls:DataGrid.Columns>
+                        <controls:DataGridTextColumn Header="ItemName" Binding="{Binding ItemName}" MinWidth="320"/>
+                        <controls:DataGridTextColumn Header="Purchase ($)" Binding="{Binding Purchase}"/>
+                        <controls:DataGridTextColumn Header="Price ($)" Binding="{Binding Price}"/>
+                        <controls:DataGridTextColumn Header="Get ($)" Binding="{Binding Get}"/>
+                        <controls:DataGridTextColumn Header="Precent (%)" Binding="{Binding Precent}"/>
+                        <controls:DataGridTextColumn Header="Difference ($)" Binding="{Binding Difference}"/>
+                    </controls:DataGrid.Columns>
+                </controls:DataGrid>
+                <!--Loading-->
+                <Grid Visibility="{Binding LoadingBar.IsBusy}">
+                    <Grid Background="Black" Opacity="0.5"/>
+                    <InfoBar IsOpen="True" Severity="Informational" Title="{Binding LoadingBar.Title}" Message="{Binding LoadingBar.Message}"
+                             VerticalAlignment="Center" HorizontalAlignment="Center" IsClosable="False" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                        <ProgressBar Margin="-45 0 0 0" IsIndeterminate="True"/>
+                    </InfoBar>
+                </Grid>
+                <!--Filters-->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>
+                    <AutoSuggestBox PlaceholderText="Type a item name" QueryIcon="Find" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextChanged="AutoSuggestBox_TextChanged"/>
+                    <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Grid.Column="1">
+                        <AppBarButton Icon="Filter" Label="Filter" x:Name="FilterBtn">
+                            <AppBarButton.Flyout>
+                                <MenuFlyout Placement="Bottom">
+                                    <MenuFlyoutItem Text="Reset" Icon="Clear"/>
+                                    <MenuFlyoutSeparator/>
+                                    <MenuFlyoutSubItem Text="Category">
+                                        <ToggleMenuFlyoutItem Text="Normal"/>
+                                        <ToggleMenuFlyoutItem Text="Souvenir"/>
+                                        <ToggleMenuFlyoutItem Text="StatTrak™"/>
+                                        <ToggleMenuFlyoutItem Text="★"/>
+                                        <ToggleMenuFlyoutItem Text="★ StatTrak™"/>
+                                    </MenuFlyoutSubItem>
+                                    <MenuFlyoutSubItem Text="Exterior">
+                                        <ToggleMenuFlyoutItem Text="Not Painted"/>
+                                        <ToggleMenuFlyoutItem Text="Factory New"/>
+                                        <ToggleMenuFlyoutItem Text="Minimal Wear"/>
+                                        <ToggleMenuFlyoutItem Text="Field-Tested"/>
+                                        <ToggleMenuFlyoutItem Text="Well-Worn"/>
+                                        <ToggleMenuFlyoutItem Text="Battle-Scarred"/>
+                                    </MenuFlyoutSubItem>
+                                    <MenuFlyoutSubItem Text="Quality">
+                                        <ToggleMenuFlyoutItem Text="Industrial" Foreground="#FF5E98D9"/>
+                                        <ToggleMenuFlyoutItem Text="Mil-Spec" Foreground="#FF4B69FF"/>
+                                        <ToggleMenuFlyoutItem Text="Restricted" Foreground="#FF8847FF"/>
+                                        <ToggleMenuFlyoutItem Text="Classified" Foreground="#FFD32CE6"/>
+                                        <ToggleMenuFlyoutItem Text="Covert" Foreground="#FFEB4B4B"/>
+                                        <ToggleMenuFlyoutItem Text="Contraband" Foreground="#FFE4AE39"/>
+                                    </MenuFlyoutSubItem>
+                                    <MenuFlyoutSubItem Text="Types">
+                                        <ToggleMenuFlyoutItem Text="Weapon" IsChecked="{Binding Weapon}"/>
+                                        <ToggleMenuFlyoutItem Text="Knife" IsChecked="{Binding Knife}"/>
+                                        <ToggleMenuFlyoutItem Text="Gloves" IsChecked="{Binding Gloves}"/>
+                                        <ToggleMenuFlyoutItem Text="Agent" IsChecked="{Binding Agent}"/>
+                                        <ToggleMenuFlyoutItem Text="Sticker" IsChecked="{Binding Sticker}"/>
 
-                                <ToggleMenuFlyoutItem Text="Patch" IsChecked="{Binding Patch}"/>
-                                <ToggleMenuFlyoutItem Text="Collectible" IsChecked="{Binding Collectible}"/>
-                                <ToggleMenuFlyoutItem Text="Key" IsChecked="{Binding Key}"/>
-                                <ToggleMenuFlyoutItem Text="Pass" IsChecked="{Binding Pass}"/>
-                                <ToggleMenuFlyoutItem Text="Music Kit" IsChecked="{Binding MusicKit}"/>
+                                        <ToggleMenuFlyoutItem Text="Patch" IsChecked="{Binding Patch}"/>
+                                        <ToggleMenuFlyoutItem Text="Collectible" IsChecked="{Binding Collectible}"/>
+                                        <ToggleMenuFlyoutItem Text="Key" IsChecked="{Binding Key}"/>
+                                        <ToggleMenuFlyoutItem Text="Pass" IsChecked="{Binding Pass}"/>
+                                        <ToggleMenuFlyoutItem Text="Music Kit" IsChecked="{Binding MusicKit}"/>
 
-                                <ToggleMenuFlyoutItem Text="Graffiti" IsChecked="{Binding Graffiti}"/>
-                                <ToggleMenuFlyoutItem Text="Container" IsChecked="{Binding Container}"/>
-                                <ToggleMenuFlyoutItem Text="Gift" IsChecked="{Binding Gift}"/>
-                                <ToggleMenuFlyoutItem Text="Tool" IsChecked="{Binding Tool}"/>
-                            </MenuFlyoutSubItem>
-                            <MenuFlyoutItem Text="Additional" Icon="More" Click="AdditionalBtn_Click"/>
-                        </MenuFlyout>
-                    </AppBarButton.Flyout>
-                </AppBarButton>
-                <AppBarButton Icon="List" Label="Group By"/>
-            </CommandBar>
-        </Grid>
-        <TeachingTip x:Name="FilterTeachingTip" Title="Additional Filter" PreferredPlacement="Top" IsLightDismissEnabled="True" Target="{x:Bind FilterBtn}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0 5 0 0">
-                    <NumberBox Header="Purchase" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
-                    <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0 5 0 0">
-                    <NumberBox Header="Price" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
-                    <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0 5 0 0">
-                    <NumberBox Header="Get" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
-                    <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="0 5 0 0">
-                    <NumberBox Header="Precent" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
-                    <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="4" Margin="0 5 0 0">
-                    <NumberBox Header="Difference" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
-                    <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
-                </StackPanel>
+                                        <ToggleMenuFlyoutItem Text="Graffiti" IsChecked="{Binding Graffiti}"/>
+                                        <ToggleMenuFlyoutItem Text="Container" IsChecked="{Binding Container}"/>
+                                        <ToggleMenuFlyoutItem Text="Gift" IsChecked="{Binding Gift}"/>
+                                        <ToggleMenuFlyoutItem Text="Tool" IsChecked="{Binding Tool}"/>
+                                    </MenuFlyoutSubItem>
+                                    <MenuFlyoutItem Text="Additional" Icon="More" Click="AdditionalBtn_Click"/>
+                                </MenuFlyout>
+                            </AppBarButton.Flyout>
+                        </AppBarButton>
+                    </CommandBar>
+                </Grid>
+                <TeachingTip x:Name="FilterTeachingTip" Title="Additional Filter" PreferredPlacement="Top" IsLightDismissEnabled="True" Target="{x:Bind FilterBtn}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0 5 0 0">
+                            <NumberBox Header="Purchase" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
+                            <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0 5 0 0">
+                            <NumberBox Header="Price" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
+                            <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0 5 0 0">
+                            <NumberBox Header="Get" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
+                            <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="0 5 0 0">
+                            <NumberBox Header="Precent" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
+                            <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="4" Margin="0 5 0 0">
+                            <NumberBox Header="Difference" Minimum="0" Width="130" PlaceholderText="From" SpinButtonPlacementMode="Compact" SmallChange="3"/>
+                            <NumberBox Header=" " Margin="10 0 0 0" Minimum="0" Width="130" PlaceholderText="To" SpinButtonPlacementMode="Compact" SmallChange="3"/>
+                        </StackPanel>
+                    </Grid>
+                </TeachingTip>
             </Grid>
+            <!--Import-->
+            <Grid Grid.Column="1" CornerRadius="{ThemeResource ControlCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderThickness="1"
+                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Padding="6" HorizontalAlignment="Stretch" MaxWidth="430" Margin="10 0 0 0" x:Name="ImportPage" Visibility="Collapsed">
+                
+            </Grid>
+            </Grid>
+        <!--Message-->
+        <TeachingTip PreferredPlacement="Top" IsOpen="{Binding MessageBar.IsOpen}" IsLightDismissEnabled="True" PlacementMargin="0 10 0 0" x:Name="MessageBar">
+            <InfoBar IsOpen="True" Severity="{Binding MessageBar.Severity}" Title="{Binding MessageBar.Title}" Message="{Binding MessageBar.Message}"
+                     VerticalAlignment="Center" IsClosable="False"/>
         </TeachingTip>
     </Grid>
 </Page>

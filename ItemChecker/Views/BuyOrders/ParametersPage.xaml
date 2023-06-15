@@ -11,20 +11,9 @@
     mc:Ignorable="d">
     <StackPanel>
         <StackPanel Orientation="Horizontal">
-            <ComboBox Header="Service" SelectedIndex="0" Width="150">
-                <ComboBox.Items>
-                    <ComboBoxItem>SteamMarket(A)</ComboBoxItem>
-                    <ComboBoxItem>SteamMarket</ComboBoxItem>
-                    <ComboBoxItem>CsMoney(T)</ComboBoxItem>
-                    <ComboBoxItem>LootFarm</ComboBoxItem>
-                    <ComboBoxItem>Buff163(A)</ComboBoxItem>
-                    <ComboBoxItem>Buff163</ComboBoxItem>
-                </ComboBox.Items>
-            </ComboBox>
-            <NumberBox Header="Min. precent (%)" SpinButtonPlacementMode="Compact" Width="110" Margin="5 0 0 0"
-                   PlaceholderText="Default: 20" Minimum="-100" Maximum="999" Value="20"/>
+            <ComboBox Header="Service" Width="150" ItemsSource="{Binding Services}" SelectedIndex="{Binding ServiceId, Mode=TwoWay}"/>
+            <NumberBox Header="Min. precent (%)" Width="110" Margin="5 0 0 0" PlaceholderText="Default: 20" Minimum="-100" Maximum="999" Value="{Binding MinPrecent, Mode=TwoWay}"/>
         </StackPanel>
-        <NumberBox Header="Timer (minutes)" SpinButtonPlacementMode="Inline" Margin="0 5 0 0"
-                   Minimum="3" Maximum="720" PlaceholderText="Default: 10" Value="10"/>        
+        <NumberBox Header="Timer (minutes)" SpinButtonPlacementMode="Inline" Margin="0 5 0 0" Minimum="3" Maximum="720" PlaceholderText="Default: 10" Value="{Binding Time, Mode=TwoWay}"/>        
     </StackPanel>
 </Page>

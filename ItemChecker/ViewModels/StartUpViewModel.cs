@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ItemChecker.Model.StartUp;
-using ItemChecker.Models;
 using ItemChecker.Models.StartUp;
+using ItemChecker.Models.StaticModels;
 using ItemChecker.Support;
 using System;
 using System.Globalization;
@@ -12,23 +12,11 @@ namespace ItemChecker.ViewModels
 {
     internal partial class StartUpViewModel : ObservableObject
     {
-        public bool IsLoading
-        {
-            get => _isLoading;
-            set => SetProperty(ref _isLoading, value);
-        }
+        [ObservableProperty]
         bool _isLoading = true;
-        public SignIn SignIn
-        {
-            get => _signIn;
-            set => SetProperty(ref _signIn, value);
-        }
+        [ObservableProperty]
         SignIn _signIn = new();
-        public SelectCurrency Currency
-        {
-            get => _currency;
-            set => SetProperty(ref _currency, value);
-        }
+        [ObservableProperty]
         SelectCurrency _currency = new();
 
         public StartUpViewModel() => StartUpAsync();
@@ -50,9 +38,9 @@ namespace ItemChecker.ViewModels
                 }
 
                 await SignIn.MainAsync();
-                await Account.MainAsync();
+                await SteamAccount.MainAsync();
 
-                SignIn.AccountName = Account.AccountName;
+                SignIn.AccountName = SteamAccount.AccountName;
                 await Currency.MainAsync();
 
                 await ItemBase.GetItemsBaseAsync();
@@ -80,10 +68,10 @@ namespace ItemChecker.ViewModels
         }
 
         [RelayCommand]
-        public void SignInSubmit(string pass) => SignIn.Submit(pass);
+        private void SignInSubmit(string pass) => SignIn.Submit(pass);
         [RelayCommand]
-        public void SubmitCode(string code) => SignIn.SubmitCode(code);
+        private void SubmitCode(string code) => SignIn.SubmitCode(code);
         [RelayCommand]
-        public void SubmitCurrency(DataCurrency currency) => Currency.SubmitCurrency(currency);
+        private void SubmitCurrency(DataCurrency currency) => Currency.SubmitCurrency(currency);
     }
 }

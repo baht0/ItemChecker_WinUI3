@@ -7,75 +7,34 @@ using System.Timers;
 using Newtonsoft.Json.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using static ItemChecker.Net.SteamRequest;
-using static ItemChecker.Net.ServicesRequest;
-using ItemChecker.Models;
+using ItemChecker.Models.StaticModels;
 
 namespace ItemChecker.Model.StartUp
 {
     public partial class SignIn : ObservableObject
     {
-        public string AccountName
-        {
-            get => _accountName;
-            set => SetProperty(ref _accountName, value);
-        }
+        [ObservableProperty]
         private string _accountName = string.Empty;
 
-        public bool IsErrorShow
-        {
-            get => _isErrorShow;
-            set => SetProperty(ref _isErrorShow, value);
-        }
+        [ObservableProperty]
         private bool _isErrorShow;
 
-        public bool IsSignInShow
-        {
-            get => _isSignInShow;
-            set => SetProperty(ref _isSignInShow, value);
-        }
+        [ObservableProperty]
         private bool _isSignInShow;
-        public bool IsSubmitShow
-        {
-            get => _isSubmitShow;
-            set => SetProperty(ref _isSubmitShow, value);
-        }
+        [ObservableProperty]
         bool _isSubmitShow;
-        public bool IsSubmitEnabled
-        {
-            get => _isSubmitEnabled;
-            set => SetProperty(ref _isSubmitEnabled, value);
-        }
+        [ObservableProperty]
         bool _isSubmitEnabled = true;
 
-        public bool IsConfirmationShow
-        {
-            get => _isConfirmationShow;
-            set => SetProperty(ref _isConfirmationShow, value);
-        }
+        [ObservableProperty]
         bool _isConfirmationShow;
-        public bool IsCodeEnabled
-        {
-            get => _isCodeEnabled;
-            set => SetProperty(ref _isCodeEnabled, value);
-        }
+        [ObservableProperty]
         bool _isCodeEnabled = true;
-        public bool IsExpiredShow
-        {
-            get => _isExpiredShow;
-            set => SetProperty(ref _isExpiredShow, value);
-        }
+        [ObservableProperty]
         private bool _isExpiredShow;
-        public string Remaining
-        {
-            get => _remaining;
-            set => SetProperty(ref _remaining, value);
-        }
+        [ObservableProperty]
         private string _remaining = "05 min. 00 sec.";
-        public string ErrorMess
-        {
-            get => _errorMess;
-            set => SetProperty(ref _errorMess, value);
-        }
+        [ObservableProperty]
         private string _errorMess = "Invalid code.";
 
         bool IsSubmitted { get; set; }

@@ -13,10 +13,6 @@ namespace ItemChecker.Views
             NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().First();
             ContentFrame.Navigate(typeof(ParserPage));
         }
-        public void NavigateToItemBasePage()
-        {
-            ContentFrame.Navigate(typeof(ItemBasePage));
-        }
 
         private void NavigationViewControl_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
         {
@@ -55,6 +51,7 @@ namespace ItemChecker.Views
 
         private void calculatorNavViewItem_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
+            calculatorTeachingTip.Content = new CalculatorPage();
             calculatorTeachingTip.IsOpen = !calculatorTeachingTip.IsOpen;
         }
     }

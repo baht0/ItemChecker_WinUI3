@@ -1,0 +1,47 @@
+<Page
+    x:Class="ItemChecker.Views.Database.NewTabPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ItemChecker.Views.Database"
+    xmlns:conv="using:ItemChecker.Converter"
+    xmlns:vm="using:ItemChecker.ViewModels.DatabaseViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" Margin="50 0 50 0"
+    d:DataContext="{d:DesignInstance Type=vm:NewTabViewModel}">
+    <Page.Resources>
+        <conv:DateConverter x:Key="DateConverter"/>
+        <conv:DateTimeConverter x:Key="DateTimeConverter"/>
+    </Page.Resources>
+    <Grid Margin="0 50 0 10" MinWidth="250" MaxWidth="700">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" CornerRadius="{ThemeResource ControlCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderThickness="1"
+                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Padding="10" HorizontalAlignment="Stretch" MinHeight="48">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <FontIcon Glyph="&#xE946;" FontSize="16" VerticalAlignment="Center" Margin="10 0 20 0"/>
+            <StackPanel VerticalAlignment="Center" Grid.Column="1" HorizontalAlignment="Stretch" Margin="0,0,16,0">
+                <TextBlock Text="Count:" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                <TextBlock Text="Updated:" VerticalAlignment="Center" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+            <StackPanel VerticalAlignment="Center" Grid.Column="2" HorizontalAlignment="Right">
+                <TextBlock Text="{Binding Base.Count}" VerticalAlignment="Center" TextAlignment="Right" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                <TextBlock Text="{Binding BaseUpdated, Converter={StaticResource DateTimeConverter}}" VerticalAlignment="Center" TextAlignment="Right" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+        </Grid>
+        <AutoSuggestBox Grid.Row="1" PlaceholderText="Search the item" QueryIcon="Find" VerticalAlignment="Top" Margin="0 10 0 0" HorizontalAlignment="Stretch"
+                        x:Name="searchSuggest" TextChanged="searchSuggest_TextChanged" QuerySubmitted="searchSuggest_QuerySubmitted" SuggestionChosen="searchSuggest_SuggestionChosen">
+            <AutoSuggestBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding ItemName}"/>
+                </DataTemplate>
+            </AutoSuggestBox.ItemTemplate>
+        </AutoSuggestBox>
+    </Grid>
+</Page>

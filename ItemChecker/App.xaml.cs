@@ -5,6 +5,7 @@ using System.Diagnostics;
 using Microsoft.UI.Windowing;
 using Microsoft.UI;
 using Windows.Graphics;
+using System.Security.Authentication.ExtendedProtection;
 
 namespace ItemChecker
 {
