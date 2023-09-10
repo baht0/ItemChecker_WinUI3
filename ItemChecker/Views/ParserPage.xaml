@@ -13,7 +13,9 @@
     d:DataContext="{d:DesignInstance Type=vm:ParserViewModel}">
     <Page.Resources>
         <conv:BooleanReverseConverter x:Key="BooleanReverseConverter"/>
-        <conv:IsBoughtConverter x:Key="IsBoughtConverter"/>
+        <conv:ActionStatusConverter x:Key="ActionStatusConverter"/>
+        <conv:DateConverter x:Key="DateConverter"/>
+        <conv:SteamMarketToBooleanConverter x:Key="SteamMarketToBooleanConverter"/>
     </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -24,7 +26,7 @@
         <!--Actions-->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Found:" FontSize="16" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+                <TextBlock Text="Items:" FontSize="16" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
                 <TextBlock Text="{Binding Items.Count}" FontSize="16" Margin="3 0 4 0" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
             </StackPanel>
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
@@ -52,10 +54,10 @@
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="auto"/>
-                                                    <ColumnDefinition MinWidth="25"/>
+                                                    <ColumnDefinition MinWidth="55"/>
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Text="{Binding Key}" Grid.Column="0"/>
-                                                <TextBlock Text="{Binding Value}" Grid.Column="1" HorizontalAlignment="Right" Margin="10 0 0 0" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                                <TextBlock Text="{Binding Value}" Grid.Column="1" HorizontalAlignment="Right" Margin="35 0 0 0" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -64,18 +66,24 @@
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
+                <AppBarSeparator/>
+                <AppBarButton Label="Add queue" Command="{Binding AddQueueCommand}">
+                    <AppBarButton.Icon>
+                        <FontIcon Glyph="&#xECC8;"/>
+                    </AppBarButton.Icon>
+                </AppBarButton>
             </CommandBar>
         </StackPanel>
         <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Right">
             <AppBarButton Icon="Stop" Label="Stop" Command="{Binding StopCommand}" Visibility="{Binding LoadingBar.IsBusy}"/>
             <AppBarButton Label="Parser" Icon="Play" Click="Check_Click" Visibility="{Binding LoadingBar.IsBusy, Converter={StaticResource BooleanReverseConverter}}"/>
-            <AppBarButton Label="Continue" Command="{Binding ContinueCommand}">
+            <AppBarButton Label="Continue" Command="{Binding ContinueCommand}" Visibility="{Binding IsCanContinue}">
                 <AppBarButton.Icon>
                     <FontIcon Glyph="&#xEF3B;"/>
                 </AppBarButton.Icon>
             </AppBarButton>
             <AppBarSeparator/>
-            <AppBarToggleButton Label="Import" x:Name="ImportBtn" Click="ImportBtn_Click">
+            <AppBarToggleButton Label="Import" x:Name="ImportBtn" Click="ImportBtn_Click" IsEnabled="{Binding LoadingBar.IsBusy, Converter={StaticResource BooleanReverseConverter}}">
                 <AppBarToggleButton.Icon>
                     <FontIcon Glyph="&#xE8B5;"/>
                 </AppBarToggleButton.Icon>
@@ -93,39 +101,11 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <Grid.Resources>
-                    <!--RowInfo-->
-                    <DataTemplate x:Key="RowDetailsTemplate">
-                        <StackPanel>
-                            <TextBlock Margin="20" Text="Here are the details for the selected mountain:" />
-                            <Grid Margin="20,10" Padding="5">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Coordinates: " FontWeight="SemiBold" FontSize="13" />
-                                <TextBlock Grid.Row="1" Text="Prominence (m): " FontWeight="SemiBold" FontSize="13" />
-                                <TextBlock Grid.Row="2" Text="First Ascent (year): " FontWeight="SemiBold" FontSize="13" />
-                                <TextBlock Grid.Row="3" Text="No. of ascents: " FontWeight="SemiBold" FontSize="13" />
-                                <TextBlock Grid.Column="1" FontSize="13" Text="{Binding Coordinates}" HorizontalAlignment="Right" />
-                                <TextBlock Grid.Row="1" Grid.Column="1" FontSize="13" Text="{Binding Prominence}" HorizontalAlignment="Right" />
-                                <TextBlock Grid.Row="2" Grid.Column="1" FontSize="13" Text="{Binding First_ascent}" HorizontalAlignment="Right" />
-                                <TextBlock Grid.Row="3" Grid.Column="1" FontSize="13" Text="{Binding Ascents}" HorizontalAlignment="Right" />
-                            </Grid>
-                        </StackPanel>
-                    </DataTemplate>
-                </Grid.Resources>
                 <controls:DataGrid x:Name="dataGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                                        HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" AlternatingRowBackground="{ThemeResource SurfaceStrokeColorFlyoutBrush}"
                                        AlternatingRowForeground="{ThemeResource AppBarItemForegroundThemeBrush}" AreRowDetailsFrozen="True" ItemsSource="{Binding Items}"
-                                        AreRowGroupHeadersFrozen="False"
-                                        AutoGenerateColumns="False"
+                                        AreRowGroupHeadersFrozen="False" DoubleTapped="dataGrid_DoubleTapped" SelectedItem="{Binding Item}"
+                                        AutoGenerateColumns="False" KeyDown="dataGrid_KeyDown"
                                         CanUserSortColumns="True" Sorting="dataGrid_Sorting"
                                         CanUserReorderColumns="False"
                                         CanUserResizeColumns="False"
@@ -135,17 +115,26 @@
                                         GridLinesVisibility="All"
                                         HeadersVisibility="Column"
                                         IsReadOnly="True"
-                                        RowDetailsTemplate="{StaticResource RowDetailsTemplate}"
                                         RowDetailsVisibilityMode="VisibleWhenSelected"
                                         SelectionMode="Single"
                                         RowGroupHeaderPropertyNameAlternative="Range">
                     <controls:DataGrid.Columns>
-                        <controls:DataGridTextColumn Header="ItemName" Binding="{Binding ItemName}" MinWidth="320"/>
-                        <controls:DataGridTextColumn Header="Purchase ($)" Binding="{Binding Purchase}"/>
-                        <controls:DataGridTextColumn Header="Price ($)" Binding="{Binding Price}"/>
-                        <controls:DataGridTextColumn Header="Get ($)" Binding="{Binding Get}"/>
-                        <controls:DataGridTextColumn Header="Precent (%)" Binding="{Binding Precent}"/>
-                        <controls:DataGridTextColumn Header="Difference ($)" Binding="{Binding Difference}"/>
+                        <controls:DataGridTemplateColumn Width="30" Tag="Check" CanUserSort="False">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate >
+                                    <StackPanel Orientation="Horizontal" Margin="5 0 0 0">
+                                        <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" HorizontalAlignment="Center"
+                                                  Visibility="{Binding IsCanCheck}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                        <controls:DataGridTextColumn Header="ItemName" Binding="{Binding ItemName}" Tag="ItemName" Width="auto" MinWidth="320"/>
+                        <controls:DataGridTextColumn Header="Purchase ($)" Binding="{Binding Purchase}" Tag="Purchase"/>
+                        <controls:DataGridTextColumn Header="Price ($)" Binding="{Binding Price}" Tag="Price"/>
+                        <controls:DataGridTextColumn Header="Get ($)" Binding="{Binding Get}" Tag="Get"/>
+                        <controls:DataGridTextColumn Header="Precent (%)" Binding="{Binding Precent}" Tag="Precent"/>
+                        <controls:DataGridTextColumn Header="Difference ($)" Binding="{Binding Difference}" Tag="Difference"/>
                     </controls:DataGrid.Columns>
                 </controls:DataGrid>
                 <!--Loading-->
@@ -162,8 +151,9 @@
                         <ColumnDefinition/>
                         <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
-                    <AutoSuggestBox PlaceholderText="Type a item name" QueryIcon="Find" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextChanged="AutoSuggestBox_TextChanged"/>
-                    <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Grid.Column="1">
+                    <AutoSuggestBox PlaceholderText="Type a item name" QueryIcon="Find" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextChanged="AutoSuggestBox_TextChanged"
+                                    IsEnabled="{Binding LoadingBar.IsBusy, Converter={StaticResource BooleanReverseConverter}}"/>
+                    <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Grid.Column="1" IsEnabled="{Binding LoadingBar.IsBusy, Converter={StaticResource BooleanReverseConverter}}">
                         <AppBarButton Icon="Filter" Label="Filter" x:Name="FilterBtn">
                             <AppBarButton.Flyout>
                                 <MenuFlyout Placement="Bottom">
@@ -208,7 +198,7 @@
                                         <ToggleMenuFlyoutItem Text="Graffiti" IsChecked="{Binding Graffiti}"/>
                                         <ToggleMenuFlyoutItem Text="Container" IsChecked="{Binding Container}"/>
                                         <ToggleMenuFlyoutItem Text="Gift" IsChecked="{Binding Gift}"/>
-                                        <ToggleMenuFlyoutItem Text="Tool" IsChecked="{Binding Tool}"/>
+                                        <ToggleMenuFlyoutItem Text="Tool" IsChecked="{Binding Tool1}"/>
                                     </MenuFlyoutSubItem>
                                     <MenuFlyoutItem Text="Additional" Icon="More" Click="AdditionalBtn_Click"/>
                                 </MenuFlyout>
@@ -250,14 +240,71 @@
             </Grid>
             <!--Import-->
             <Grid Grid.Column="1" CornerRadius="{ThemeResource ControlCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderThickness="1"
-                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Padding="6" HorizontalAlignment="Stretch" MaxWidth="430" Margin="10 0 0 0" x:Name="ImportPage" Visibility="Collapsed">
-                
+                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Padding="6" HorizontalAlignment="Stretch" Width="280" Margin="10 0 0 0" x:Name="ImportPage" Visibility="Collapsed">
+                <ProgressRing IsIndeterminate="True" Visibility="{Binding ImportTool.IsBusy}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <ListView Grid.Row="1" CanReorderItems="False" AllowDrop="True" SelectionMode="Single" ItemsSource="{Binding ImportTool.Items, Mode=TwoWay}"
+                          ToolTipService.ToolTip="Double click to load" DoubleTapped="ListView_DoubleTapped" SelectedItem="{Binding ImportTool.Selected, Mode=TwoWay}">
+                    <ListView.Header>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Found:" FontSize="14" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="5 0 3 0"/>
+                                <TextBlock Text="{Binding ImportTool.Items.Count}" FontSize="14" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button VerticalAlignment="Bottom" Height="29" Width="40" ToolTipService.ToolTip="Delete all" Style="{StaticResource CommandBarFlyoutEllipsisButtonStyle}">
+                                    <Button.Content>
+                                        <FontIcon Glyph="&#xEA99;" FontSize="11"/>
+                                    </Button.Content>
+                                    <Button.Flyout>
+                                        <Flyout Placement="Left">
+                                            <StackPanel>
+                                                <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="All items will be removed from the list." Margin="0,0,0,12" />
+                                                <Button Content="Delete" Command="{Binding ClearListCommand}"/>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </ListView.Header>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <UserControl>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <SwipeControl x:Name="ListViewSwipeContainer">
+                                        <Grid VerticalAlignment="Center" Padding="0 6 0 6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Items:" Margin="0 0 5 0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Size}" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding DateTime, Converter={StaticResource DateConverter}}" FontSize="11" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                            </StackPanel>
+                                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                <TextBlock Text="{Binding ServiceOneName}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding ServiceTwoName}" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </SwipeControl>
+                                </Grid>
+                            </UserControl>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
             </Grid>
-            </Grid>
+            <TeachingTip x:Name="calculatorTeachingTip" Title="Calculator" PreferredPlacement="LeftBottom" Width="500"/>
+        </Grid>
         <!--Message-->
-        <TeachingTip PreferredPlacement="Top" IsOpen="{Binding MessageBar.IsOpen}" IsLightDismissEnabled="True" PlacementMargin="0 10 0 0" x:Name="MessageBar">
-            <InfoBar IsOpen="True" Severity="{Binding MessageBar.Severity}" Title="{Binding MessageBar.Title}" Message="{Binding MessageBar.Message}"
-                     VerticalAlignment="Center" IsClosable="False"/>
+        <TeachingTip PreferredPlacement="Top" IsLightDismissEnabled="True" PlacementMargin="0 10 0 0" x:Name="MessageTip">
+            <InfoBar IsOpen="True" VerticalAlignment="Center" IsClosable="False" x:Name="MessageBar"/>
         </TeachingTip>
     </Grid>
 </Page>
