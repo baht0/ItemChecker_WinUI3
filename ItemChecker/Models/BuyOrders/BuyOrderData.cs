@@ -7,13 +7,13 @@ using ItemChecker.Support;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using static ItemChecker.Models.StaticModels.BaseConfig;
 
 namespace ItemChecker.Models.BuyOrders
 {
     public partial class BuyOrderData : ObservableObject
     {
         private int ServiceId { get; set; }
-        public bool IsCanceled { get; private set; }
 
         public string ItemName { get; set; }
         public string Image { get; set; }
@@ -35,7 +35,8 @@ namespace ItemChecker.Models.BuyOrders
         [ObservableProperty]
         private bool impossible;
 
-        public BuyOrderData(HtmlNode item, int serviceId)
+        public BuyOrderData(HtmlNode item, int serviceId) => GetItemData(item, serviceId);
+        public async void GetItemData(HtmlNode item, int serviceId)
         {
             ServiceId = serviceId;
             ItemName = item.SelectSingleNode(".//div[4]/span/a").InnerText.Trim();
@@ -45,9 +46,9 @@ namespace ItemChecker.Models.BuyOrders
             Count = Convert.ToInt32(item.SelectSingleNode(".//div[3]").InnerText.Trim());
             OrderPrice = Edit.GetDouble(order_price[3..].Trim());
 
-            SetService();
+            await SetService();
         }
-        private async void SetService()
+        private async Task SetService()
         {
             var Item = ItemBase.List.FirstOrDefault(x => x.ItemName == ItemName);
             if (Item == null)
@@ -71,7 +72,7 @@ namespace ItemChecker.Models.BuyOrders
                     }
                 case 3:
                     {
-                        await ItemBase.UpdateLfmAsync();
+                        await ItemBase.UpdateLfm();
                         ServicePrice = Item.Lfm.Price;
                         ServiceGive = Math.Round(ServicePrice * SteamAccount.Lfm.Commission, 2);
                         break;
@@ -98,10 +99,16 @@ namespace ItemChecker.Models.BuyOrders
             }
         }
 
-
+        [ObservableProperty]
+        private ActionStatus isCanceled = ActionStatus.None;
         [RelayCommand]
-        private void CancelOrder() => Cancel();
-        public async void Cancel() => await SteamRequest.Post.CancelBuyOrder(ItemName, Id);
+        private async void CancelOrder() => await Cancel();
+        public async Task Cancel()
+        {
+            var res = await SteamRequest.Post.CancelBuyOrder(ItemName, Id);
+            if (res.StatusCode == System.Net.HttpStatusCode.OK)
+                IsCanceled = ActionStatus.OK;
+        }
         public async Task Push(double availableAmount, double minPrecent)
         {
             var item = ItemBase.List.FirstOrDefault(x => x.ItemName == ItemName);
@@ -115,8 +122,7 @@ namespace ItemChecker.Models.BuyOrders
 
                 if (SteamAccount.Balance < highestBuyOrder || (precent < minPrecent && ServiceId != 0))
                 {
-                    IsCanceled = true;
-                    Cancel();
+                    await Cancel();
                     return;
                 }
                 else if (highestBuyOrder <= OrderPrice)
@@ -131,15 +137,15 @@ namespace ItemChecker.Models.BuyOrders
                 await Task.Delay(1500);
                 if (res.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    IsCanceled = true;
-                    res = await SteamRequest.Post.CreateBuyOrder(ItemName, highestBuyOrder, Count, id);
+                    IsCanceled = ActionStatus.OK;
+                    res = await SteamRequest.Post.CreateBuyOrder(ItemName, highestBuyOrder, id, Count);
                     await Task.Delay(1500);
                     if (res.StatusCode == System.Net.HttpStatusCode.OK)
                     {
-                        IsCanceled = false;
+                        IsCanceled = ActionStatus.None;
                         Pushed++;
                         OrderPrice = highestBuyOrder + 0.01d;
-                        SetService();
+                        await SetService();
                     }
                 }
             }

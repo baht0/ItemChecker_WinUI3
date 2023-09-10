@@ -14,7 +14,7 @@ namespace ItemChecker.Models.BuyOrders
         public Dictionary<string, object> GetInfo() => new()
             {
                 { "Service:", Services[ServiceId] },
-                { "Min. precent:", MinPrecent },
+                { "Min. precent (%):", MinPrecent },
                 { "Timer (min.):", Time }
             };
     }
