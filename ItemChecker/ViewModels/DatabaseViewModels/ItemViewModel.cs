@@ -5,6 +5,7 @@ using ItemChecker.Models.DatabaseItem;
 using ItemChecker.Models.StaticModels;
 using ItemChecker.Support;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
@@ -15,52 +16,56 @@ namespace ItemChecker.ViewModels.DatabaseViewModels
     {
         #region ObservableProperty
         [ObservableProperty]
-        Item _item;
+        Item item;
 
         [ObservableProperty]
-        DataService _selected = new();
+        DataService selected = new();
 
         [ObservableProperty]
-        History _history;
+        History history;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(RefreshCommand))]
-        LoadingBar _loadingBar = new();
+        LoadingBar loadingBar = new();
         public bool IsNotBusy() => !LoadingBar.IsBusy;
 
-        partial void OnSelectedChanged(DataService value)
+        async partial void OnSelectedChanged(DataService value)
         {
             if (value != null && value != new DataService())
-                History = new(Item, value.ServiceId);
+            {
+                History = new(Item);
+                await History.GetSaleHistory(value.ServiceId);
+            }
         }
         #endregion
 
         public ItemViewModel(string itemName)
         {
             Item = ItemBase.List.FirstOrDefault(x => x.ItemName == itemName);
-            _ = Load();
+            Load();
         }
-        private async Task Load()
+        private async void Load()
         {
             try
             {
                 LoadingBar = new(true, "Data", "Loading...");
                 await Item.UpdateSteamItem();
-                //await Item.UpdateCsmItem(true);
-                //await ItemBase.UpdateLfmAsync();
+                await Item.UpdateCsmItem(true);
+                await ItemBase.UpdateLfm();
                 await Item.UpdateBuffItem();
 
                 foreach (var serv in BaseConfig.Services)
                 {
-                    var service = new DataService(Item, serv);
+                    var service = new DataService();
+                    await Task.Run(() => service.UpdateData(Item, serv));
                     Items.Add(service);
                 }
                 foreach (var serv in Items)
                     serv.Compare.DataServices = Items.ToList();
             }
-            catch
+            catch (Exception ex)
             {
-
+                Debug.WriteLine(ex.Message);
             }
             finally
             {
@@ -74,13 +79,14 @@ namespace ItemChecker.ViewModels.DatabaseViewModels
             var dataPackage = new DataPackage();
             dataPackage.SetText(Item.ItemName);
             Clipboard.SetContent(dataPackage);
+            MessageShow("Item name", "Copied.", 1);
         }
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
-        private async void Refresh()
+        private void Refresh()
         {
             Items = new();
             Selected = new();
-            await Load();
+            Load();
         }
         [RelayCommand]
         private void OpenIn(int id)

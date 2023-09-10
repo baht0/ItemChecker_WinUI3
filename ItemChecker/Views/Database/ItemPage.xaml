@@ -25,9 +25,14 @@
         </Grid.RowDefinitions>
         <!--Actions-->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-            <Image Source="{Binding Item.Image}" Height="40"/>
+            <Image Source="{Binding Item.Image}" Height="40" x:Name="SkinImage" Tapped="Image_Tapped"/>
             <TextBlock Text="{Binding Item.ItemName}" FontSize="16" Margin="15 0 10 0" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
         </StackPanel>
+        <TeachingTip x:Name="FullSkinImage" Target="{x:Bind SkinImage}" PreferredPlacement="RightBottom" IsLightDismissEnabled="True">
+            <TeachingTip.Content>
+                <Image Source="{Binding Item.Image}" Height="250" />
+            </TeachingTip.Content>
+        </TeachingTip>
         <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Right">
             <AppBarButton Label="Copy name" Icon="Copy" Command="{Binding CopyNameCommand}"/>
             <AppBarButton Label="Refresh" Icon="Refresh" Command="{Binding RefreshCommand}"/>
@@ -71,9 +76,24 @@
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>
-                            <MenuFlyoutSeparator VerticalAlignment="Bottom"/>
+                            <MenuFlyoutSeparator VerticalAlignment="Bottom" Visibility="{Binding IsRowInfo}"/>
                             <Grid Grid.Row="1" HorizontalAlignment="Left" Padding="15" Visibility="{Binding IsRowInfo}">
-                                <Grid x:Name="LootFarmGrid" Visibility="Visible" Width="auto">
+                                <ItemsControl ItemsSource="{Binding RowInfo, Mode=TwoWay}" Width="auto" MinWidth="300">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <controls:UniformGrid Rows="3"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <TextBlock Text="{Binding Key}" FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding Value, Converter={StaticResource TradeLockConverter}}" HorizontalAlignment="Right" Margin="0 0 10 0"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Grid x:Name="LootFarmGrid" Visibility="Collapsed" Width="auto">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="auto"/>
                                         <ColumnDefinition Width="auto"/>
@@ -140,7 +160,6 @@
                         <controls:DataGridTextColumn Header="Get ($)" Binding="{Binding Get}"/>
                         <controls:DataGridTextColumn Header="Have" Binding="{Binding Have}"/>
                         <controls:DataGridTextColumn Header="Available" Binding="{Binding Available}"/>
-                        <controls:DataGridTextColumn Header="Updated" Binding="{Binding Updated, Converter={StaticResource DateTimeConverter}}"/>
                     </controls:DataGrid.Columns>
                 </controls:DataGrid>
                 <!--Loading-->
@@ -184,7 +203,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <TextBlock Text="{Binding Key}"/>
+                                    <TextBlock Text="{Binding Key}" Style="{ThemeResource BodyStrongTextBlockStyle}"/>
                                     <TextBlock Text="{Binding Value, Converter={StaticResource TradeLockConverter}}" HorizontalAlignment="Right" Margin="0 0 0 5"/>
                                 </Grid>
                             </DataTemplate>
@@ -215,8 +234,12 @@
                         </controls:DataGrid.Columns>
                     </controls:DataGrid>
                 </Grid>
-                <ProgressRing Grid.Row="1" IsIndeterminate="True" Visibility="{Binding History.IsBusy}"/>
+                <ProgressRing IsIndeterminate="True" VerticalAlignment="Center" Grid.RowSpan="2" Visibility="{Binding History.IsBusy}"/>
             </Grid>
         </Grid>
+        <!--Message-->
+        <TeachingTip PreferredPlacement="Top" IsLightDismissEnabled="True" PlacementMargin="0 10 0 0" x:Name="MessageTip">
+            <InfoBar IsOpen="True" VerticalAlignment="Center" IsClosable="False" x:Name="MessageBar"/>
+        </TeachingTip>
     </Grid>
 </Page>
