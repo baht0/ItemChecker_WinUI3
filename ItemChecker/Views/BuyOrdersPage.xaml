@@ -13,6 +13,7 @@
     d:DataContext="{d:DesignInstance Type=vm:BuyOrderViewModel}">
     <Page.Resources>
         <conv:BooleanReverseConverter x:Key="BooleanReverseConverter"/>
+        <conv:ActionStatusConverter x:Key="ActionStatusConverter"/>
     </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -23,7 +24,7 @@
         <!--Actions-->
         <StackPanel Orientation="Horizontal">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Found:" FontSize="16" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+                <TextBlock Text="Items:" FontSize="16" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
                 <TextBlock Text="{Binding Items.Count}" FontSize="16" Margin="3 0 4 0" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
             </StackPanel>
             <CommandBar HorizontalAlignment="Left" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
@@ -64,7 +65,7 @@
                     </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarSeparator/>
-                <AppBarButton Icon="Refresh" Label="Refresh" ToolTipService.ToolTip="Reload orders and clear items statistics" Command="{Binding RefreshCommand}"/>
+                <AppBarButton Icon="Refresh" Label="Refresh" Command="{Binding RefreshCommand}"/>
                 <AppBarButton Icon="Clear" Label="Cancel all">
                     <AppBarButton.Flyout>
                         <Flyout>
@@ -80,9 +81,9 @@
         <CommandBar HorizontalAlignment="Right" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
             <AppBarButton Icon="Stop" Label="Stop" Command="{Binding StopCommand}" Visibility="{Binding LoadingBar.IsBusy}"/>
             <AppBarButton Icon="Play" Label="Push" Click="Push_Click" Visibility="{Binding LoadingBar.IsBusy, Converter={StaticResource BooleanReverseConverter}}"/>
-            <AppBarToggleButton Label="Items" Click="ItemsToggle_Click" x:Name="ItemsBtn" IsEnabled="{Binding LoadingBar.IsBusy, Converter={StaticResource BooleanReverseConverter}}">
+            <AppBarToggleButton Label="Queue" Click="ItemsToggle_Click" x:Name="ItemsBtn" IsEnabled="{Binding LoadingBar.IsBusy, Converter={StaticResource BooleanReverseConverter}}">
                 <AppBarToggleButton.Icon>
-                    <FontIcon Glyph="&#xE728;"/>
+                    <FontIcon Glyph="&#xE9D5;"/>
                 </AppBarToggleButton.Icon>
             </AppBarToggleButton>
         </CommandBar>
@@ -142,8 +143,11 @@
                                         </StackPanel>
                                     </Grid>
                                 </Grid>
-                                <Button HorizontalAlignment="Right" VerticalAlignment="Top" Content="Cancel" Style="{ThemeResource AccentButtonStyle}"
-                                        Command="{Binding CancelOrderCommand}" Click="CancelBtn_Click"/>
+                                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top">
+                                    <Button HorizontalAlignment="Right" VerticalAlignment="Top" Content="Cancel" Style="{ThemeResource AccentButtonStyle}" Command="{Binding CancelOrderCommand}"
+                                            IsEnabled="{Binding IsCanceled, Converter={StaticResource ActionStatusConverter}, ConverterParameter=0}"/>
+                                    <TextBlock Text="{Binding IsCanceled, Converter={StaticResource ActionStatusConverter}, ConverterParameter=1}" Margin="0 5 5 0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                </StackPanel>
                             </Grid>
                         </StackPanel>
                     </DataTemplate>
@@ -151,7 +155,7 @@
                 <controls:DataGrid x:Name="dataGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                                        HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" AlternatingRowBackground="{ThemeResource SurfaceStrokeColorFlyoutBrush}" IsEnabled="True"
                                        AlternatingRowForeground="{ThemeResource AppBarItemForegroundThemeBrush}" AreRowDetailsFrozen="True" ItemsSource="{Binding Items}"
-                                        AreRowGroupHeadersFrozen="False"
+                                        AreRowGroupHeadersFrozen="False" DoubleTapped="dataGrid_DoubleTapped" KeyDown="dataGrid_KeyDown"
                                         AutoGenerateColumns="False"
                                         CanUserSortColumns="True" Sorting="dataGrid_Sorting"
                                         CanUserReorderColumns="False"
@@ -183,18 +187,54 @@
                     </InfoBar>
                 </Grid>
                 <!--Filter-->
-                <AutoSuggestBox Grid.Row="2" PlaceholderText="Type a item name" TextChanged="AutoSuggestBox_TextChanged" QueryIcon="Find" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0 8 0 8"/>
+                <AutoSuggestBox Grid.Row="2" PlaceholderText="Type a item name" TextChanged="AutoSuggestBox_TextChanged" QueryIcon="Find" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0 8 0 8"
+                                IsEnabled="{Binding LoadingBar.IsBusy, Converter={StaticResource BooleanReverseConverter}}"/>
             </Grid>
-            <!--Items-->
+            <!--Queue-->
             <Grid Grid.Column="1" CornerRadius="{ThemeResource ControlCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderThickness="1"
                   BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Padding="6" HorizontalAlignment="Stretch" MaxWidth="430" Margin="10 0 0 0" x:Name="ItemsPage" Visibility="Collapsed">
-                
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <!--Info-->
+                <InfoBar IsOpen="True" Title="Queue (Optional)" Message="Items for which a purchase order will be placed. Will be skipped if a different service is selected." HorizontalAlignment="Stretch" Margin="0 0 0 5"/>
+                <Grid Grid.Row="1" Margin="4">
+                    <TextBlock Text="Service:" Style="{ThemeResource BaseTextBlockStyle}"/>
+                    <TextBlock Text="{Binding QueueService}" HorizontalAlignment="Right"/>
+                </Grid>
+                <!--List-->
+                <ListView Grid.Row="2" AllowDrop="True" SelectionMode="Single" CanReorderItems="False" ItemsSource="{Binding Queue, Mode=TwoWay}">
+                    <ListView.Header>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Found:" FontSize="14" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="5 0 3 0"/>
+                                <TextBlock Text="{Binding Queue.Count}" FontSize="14" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button VerticalAlignment="Bottom" Height="29" Width="40" ToolTipService.ToolTip="Delete all" Style="{StaticResource CommandBarFlyoutEllipsisButtonStyle}">
+                                    <Button.Content>
+                                        <FontIcon Glyph="&#xEA99;" FontSize="11"/>
+                                    </Button.Content>
+                                    <Button.Flyout>
+                                        <Flyout Placement="Left">
+                                            <StackPanel>
+                                                <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="All items will be removed from the list." Margin="0,0,0,12" />
+                                                <Button Content="Delete" Command="{Binding ClearListCommand}"/>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </ListView.Header>
+                </ListView>
             </Grid>
         </Grid>
         <!--Message-->
-        <TeachingTip PreferredPlacement="Top" IsOpen="{Binding MessageBar.IsOpen}" IsLightDismissEnabled="True" PlacementMargin="0 10 0 0" x:Name="MessageBar">
-            <InfoBar IsOpen="True" Severity="{Binding MessageBar.Severity}" Title="{Binding MessageBar.Title}" Message="{Binding MessageBar.Message}"
-                     VerticalAlignment="Center" IsClosable="False"/>
+        <TeachingTip PreferredPlacement="Top" IsLightDismissEnabled="True" PlacementMargin="0 10 0 0" x:Name="MessageTip">
+            <InfoBar IsOpen="True" VerticalAlignment="Center" IsClosable="False" x:Name="MessageBar"/>
         </TeachingTip>
     </Grid>
 </Page>
