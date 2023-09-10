@@ -6,6 +6,7 @@ using ItemChecker.Models.StaticModels;
 using ItemChecker.Support;
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace ItemChecker.ViewModels
@@ -31,6 +32,7 @@ namespace ItemChecker.ViewModels
                 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CreateSpecificCulture("en-Us");
                 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CreateSpecificCulture("en-Us");
 
+                //update
                 await AppConfig.AppCheckAsync();
                 if (AppConfig.IsUpdate)
                 {
@@ -43,7 +45,7 @@ namespace ItemChecker.ViewModels
                 SignIn.AccountName = SteamAccount.AccountName;
                 await Currency.MainAsync();
 
-                await ItemBase.GetItemsBaseAsync();
+                await Task.Run(ItemBase.GetItemsBase);
 
                 var mainWindow = (MainWindow)App.MainWindow;
                 mainWindow?.StartUpCompletion();

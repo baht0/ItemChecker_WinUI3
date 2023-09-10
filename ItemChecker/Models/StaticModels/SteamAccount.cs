@@ -3,7 +3,6 @@ using ItemChecker.Models.StaticModels.Accounts;
 using ItemChecker.Net;
 using ItemChecker.Support;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,6 +16,7 @@ namespace ItemChecker.Models.StaticModels
         public static string ApiKey { get; private set; } = string.Empty;
         public static string ID64 { get; private set; } = string.Empty;
         public static double Balance { get; private set; }
+        public static double BalanceUsd => Currencies.ConverterToUsd(Balance, Currency.Id);
         public static DataCurrency Currency { get; private set; } = new();
         public static SteamInventory Inventory { get; set; } = new();
         public static CsmAccount Csm { get; set; } = new();

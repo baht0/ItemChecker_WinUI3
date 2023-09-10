@@ -12,10 +12,10 @@ namespace ItemChecker.Models
 {
     public class RareTool
     {
-        private static string ItemName { get; set; }
-        private static RareParameters Parameters { get; set; }
+        private string ItemName { get; set; }
+        private RareParameters Parameters { get; set; }
 
-        public static async Task<List<DataRare>> CheckItemAsync(string itemName, RareParameters parameters)
+        public async Task<List<DataRare>> CheckItemAsync(string itemName, RareParameters parameters)
         {
             ItemName = itemName;
             Parameters = parameters;
@@ -65,7 +65,7 @@ namespace ItemChecker.Models
             }
             return items;
         }
-        private static async Task<double> PriceCompareAsync()
+        private async Task<double> PriceCompareAsync()
         {
             var steamPrices = await SteamRequest.Get.PriceOverviewAsync(ItemName, 1);
 
@@ -80,7 +80,7 @@ namespace ItemChecker.Models
             };
         }
         //float
-        private static double MaxFloat()
+        private double MaxFloat()
         {
             double maxFloat = 0;
             if (ItemName.Contains("Factory New")) maxFloat = Parameters.FactoryNew;
@@ -92,7 +92,7 @@ namespace ItemChecker.Models
             return maxFloat;
         }
         //sticker
-        private static bool AllowStickers(DataRare data)
+        private bool AllowStickers(DataRare data)
         {
             if (!String.IsNullOrEmpty(Parameters.NameContains) && !data.Stickers.Any(x => x.Name.Contains(Parameters.NameContains)))
                 return false;
@@ -136,7 +136,7 @@ namespace ItemChecker.Models
             return false;
         }
         //doppler
-        private static bool AllowDopplerPhase(Doppler phase)
+        private bool AllowDopplerPhase(Doppler phase)
         {
             return phase switch
             {

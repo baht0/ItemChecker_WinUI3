@@ -9,6 +9,8 @@ namespace ItemChecker.ViewModels
 {
     public partial class CalculatorViewModel : ObservableObject
     {
+        public CalculatorViewModel() => Commission = SteamAccount.Inventory.Commission;
+
         public List<string> Services
         {
             get
@@ -19,20 +21,20 @@ namespace ItemChecker.ViewModels
             }
         }
         [ObservableProperty]
-        int _serviceId;
+        int serviceId;
 
         [ObservableProperty]
-        double _commission;
+        double commission;
         [ObservableProperty]
-        double _purchase;
+        double purchase;
         [ObservableProperty]
-        double _price;
+        double price;
         [ObservableProperty]
-        double _get;
+        double get;
         [ObservableProperty]
-        double _precent;
+        double precent;
         [ObservableProperty]
-        double _difference;
+        double difference;
 
         partial void OnServiceIdChanged(int value)
         {
@@ -48,9 +50,9 @@ namespace ItemChecker.ViewModels
         partial void OnCommissionChanged(double value)
         {
             if (value < 1)
-                _commission = value;
+                commission = value;
             else
-                _commission = (100 - value) / 100;
+                commission = (100 - value) / 100;
             Compare();
         }
         partial void OnPurchaseChanged(double value) => Compare();
@@ -65,24 +67,24 @@ namespace ItemChecker.ViewModels
         //currency
         public List<DataCurrency> CurrencyList => Currencies.Allow;
         [ObservableProperty]
-        int _currency1;
+        int currency1;
         [ObservableProperty]
-        int _currency2;
+        int currency2;
 
         public double Value
         {
-            get => _value;
+            get => value;
             set
             {
-                SetProperty(ref _value, value);
+                SetProperty(ref value, value);
 
-                double dol = Currency1 != 0 ? Currencies.ConverterToUsd(Value, CurrencyList[Currency1].Id) : Value;
+                double dol = Currency1 != 0 ? Currencies.ConverterToUsd(value, CurrencyList[Currency1].Id) : Value;
                 Converted = Currency2 != 0 ? Currencies.ConverterFromUsd(dol, CurrencyList[Currency2].Id) : dol;
             }
         }
-        double _value;
+        double value;
         [ObservableProperty]
-        double _converted;
+        double converted;
 
         [RelayCommand]
         private void Switch()

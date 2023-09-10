@@ -10,6 +10,8 @@ namespace ItemChecker.Models.DatabaseItem
     {
         [ObservableProperty]
         Compare _compare;
+        [ObservableProperty]
+        private Dictionary<string, object> rowInfo = new();
         public bool IsRowInfo { get; set; }
         public bool IsHistory { get; set; }
 
@@ -19,10 +21,9 @@ namespace ItemChecker.Models.DatabaseItem
         public double Get { get; set; }
         public bool Have { get; set; }
         public bool Available { get; set; } = true;
-        public DateTime Updated { get; set; }
 
         public DataService() => IsHistory = false;
-        public DataService(Item item, string service)
+        public DataService UpdateData(Item item, string service)
         {
             ServiceId = BaseConfig.Services.IndexOf(service);
             Service = service;
@@ -33,47 +34,59 @@ namespace ItemChecker.Models.DatabaseItem
                     Price = item.Steam.HighestBuyOrder;
                     Get = Math.Round(Price * SteamAccount.Inventory.Commission, 2);
                     Have = Price > 0;
-                    Updated = item.Steam.Updated;
                     break;
                 case 1:
                     IsHistory = true;
                     Price = item.Steam.LowestSellOrder;
                     Get = Math.Round(Price * SteamAccount.Inventory.Commission, 2);
                     Have = Price > 0;
-                    Updated = item.Steam.Updated;
                     break;
                 case 2:
                     Price = item.Csm.Price;
                     Get = Math.Round(Price * SteamAccount.Csm.Commission, 2);
                     Have = item.Csm.IsHave;
                     Available = item.Csm.Status == ItemStatus.Available;
-                    Updated = item.Csm.Updated;
                     break;
                 case 3:
                     IsRowInfo = true;
+                    CreateRowInfo(item);
                     var price = item.Lfm.Price;
                     Price = Math.Round(price * 1.03d, 2);
                     Get = Math.Round(price * SteamAccount.Lfm.Commission, 2);
                     Have = item.Lfm.IsHave;
                     Available = item.Lfm.Status == ItemStatus.Available;
-                    Updated = item.Lfm.Updated;
                     break;
                 case 4:
                     IsHistory = true;
                     Price = item.Buff.BuyOrder;
                     Get = Math.Round(Price * SteamAccount.Buff.Commission, 2);
                     Have = Price > 0;
-                    Updated = item.Buff.Updated;
                     break;
                 case 5:
                     IsHistory = true;
                     Price = item.Buff.Price;
                     Get = Math.Round(Price * SteamAccount.Buff.Commission, 2);
                     Have = item.Buff.IsHave;
-                    Updated = item.Buff.Updated;
                     break;
             }
             Compare = new(this);
+            return this;
+        }
+        private void CreateRowInfo(Item item)
+        {
+            var info = new Dictionary<string, object>();
+            switch (ServiceId)
+            {
+                case 3:
+                    info.Add("Price ($):", item.Lfm.Price);
+                    info.Add("Have:", item.Lfm.Have);
+                    info.Add("Tradeable:", item.Lfm.Tradable);
+                    info.Add("Steam price rate:", item.Lfm.SteamPriceRate);
+                    info.Add("Limit:", item.Lfm.Limit);
+                    info.Add("Reservable:", item.Lfm.Reservable);
+                    break;
+            }
+            RowInfo = info;
         }
     }
     public partial class Compare : ObservableObject

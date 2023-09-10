@@ -14,6 +14,7 @@ namespace ItemChecker.ViewModels
 {
     public partial class RareViewModel : BaseViewModel<DataRare>
     {
+        private RareTool Tool { get; set; } = new();
         public RareViewModel()
         {
             Info = new()
@@ -60,13 +61,7 @@ namespace ItemChecker.ViewModels
                 LoadingBar = new("Next check:", timeSpan.ToString("mm':'ss") + " min.");
                 if (!RareItems.Items.Any(x => x.Service == Parameters.ParameterName))
                 {
-                    MessageBar = new MessageBar()
-                    {
-                        IsOpen = true,
-                        Severity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error,
-                        Title = Parameters.ParameterName,
-                        Message = "The list does not contain items of this type.",
-                    };
+                    MessageShow(Parameters.ParameterName, "The list does not contain items of this type.", 3);
                     LoadingBar = new();
                     break;
                 }
@@ -86,7 +81,7 @@ namespace ItemChecker.ViewModels
                     try
                     {
                         LoadingBar = new("Checking:", $"{list.IndexOf(item) + 1}/{list.Count} items.");
-                        var checkedItem = await RareTool.CheckItemAsync(item.ItemName, Parameters.Clone());
+                        var checkedItem = await Tool.CheckItemAsync(item.ItemName, Parameters.Clone());
                         InitialItems.AddRange(checkedItem);
                     }
                     catch
@@ -178,6 +173,7 @@ namespace ItemChecker.ViewModels
         {
             string itemName = ((Item)obj).ItemName;
             RareItems.Add(itemName);
+            MessageShow("Items", "Successfully added.", 1);
         }
         [RelayCommand]
         private void DeleteItem(object obj)

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using static ItemChecker.Models.StaticModels.BaseConfig;
 
 namespace ItemChecker.Models.Rare
 {
@@ -27,16 +28,16 @@ namespace ItemChecker.Models.Rare
         public Doppler Phase { get; set; } = Doppler.None;
 
         [ObservableProperty]
-        BuyStatus _isBought = BuyStatus.None;
+        ActionStatus _isBought = ActionStatus.None;
 
         [RelayCommand]
         private void InspectInGame() => Edit.OpenUrl(Link);
         [RelayCommand]
         private async void BuyItem()
         {
-            IsBought = BuyStatus.None;
+            IsBought = ActionStatus.None;
             var response = await SteamRequest.Post.BuyListing(ItemName, DataBuy.ListingId, DataBuy.Fee, DataBuy.Subtotal, DataBuy.Total, SteamAccount.Currency.Id);
-            IsBought = response.StatusCode == System.Net.HttpStatusCode.OK ? BuyStatus.OK : BuyStatus.Error;
+            IsBought = response.StatusCode == System.Net.HttpStatusCode.OK ? ActionStatus.OK : ActionStatus.Error;
         }
 
         public DataRare(string itemName, double priceCompare)
@@ -122,11 +123,5 @@ namespace ItemChecker.Models.Rare
         Sapphire,
         BlackPearl,
         Emerald
-    }
-    public enum BuyStatus
-    {
-        None,
-        OK,
-        Error
     }
 }

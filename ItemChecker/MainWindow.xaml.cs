@@ -4,7 +4,6 @@ using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Runtime.InteropServices;
@@ -14,7 +13,7 @@ namespace ItemChecker
 {
     public partial class MainWindow : Window
     {
-        readonly NavigationPage NavigationPage = new();
+        private NavigationPage NavigationPage { get; } = new();
         public MainWindow()
         {
             this.InitializeComponent();
@@ -31,6 +30,7 @@ namespace ItemChecker
             else
                 MainGrid.Children.Remove(TitleBar);
         }
+
         public void ThemeSwitch()
         {
             string themeName = AppProperties.Settings.ThemeId switch
@@ -80,6 +80,11 @@ namespace ItemChecker
             ContentGrid.Children.Add(NavigationPage);
         }
 
+        private void MainGrid_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Escape)
+                ExitShowDialogAsync();
+        }
         public async void ExitShowDialogAsync()
         {
             var dialog = new ContentDialog()
@@ -104,6 +109,8 @@ namespace ItemChecker
             }
         }
         private void Window_Closed(object sender, WindowEventArgs args) => ExitShowDialogAsync();
+
+        public void NavigationInvoke(object item) => NavigationPage.DatabasePageInvoke(item);
 
         #region WindowSize
         IntPtr hWnd = IntPtr.Zero;
@@ -150,11 +157,5 @@ namespace ItemChecker
             public System.Drawing.Point ptMaxTrackSize;
         }
         #endregion
-
-        private void MainGrid_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
-        {
-            if (e.Key == Windows.System.VirtualKey.Escape)
-                ExitShowDialogAsync();
-        }
     }
 }

@@ -20,6 +20,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
+            <!--Theme-->
             <Grid CornerRadius="{ThemeResource ControlCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderThickness="1"
                   BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Padding="10" HorizontalAlignment="Stretch" MinHeight="48">
                 <Grid.ColumnDefinitions>
@@ -39,6 +40,7 @@
                     </ComboBox.Items>
                 </ComboBox>
             </Grid>
+            <!--Effects-->
             <Grid Grid.Row="1" CornerRadius="{ThemeResource ControlCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderThickness="1"
                   BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Padding="10" HorizontalAlignment="Stretch" MinHeight="10">
                 <Grid.ColumnDefinitions>
@@ -52,6 +54,7 @@
                 </StackPanel>
                 <ToggleSwitch Grid.Column="2" HorizontalAlignment="Left" Margin="0 0 -80 0" IsOn="{Binding IsMicaTheme, Mode=TwoWay}" IsEnabled="{Binding IsMicaSupported}" Toggled="ToggleSwitch_Toggled" VerticalAlignment="Top"/>
             </Grid>
+            <!--Patch notes-->
             <Expander Grid.Row="2" IsExpanded="False" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                 <Expander.Header>
                     <StackPanel Orientation="Horizontal">
@@ -80,7 +83,7 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                         <MenuFlyoutSeparator Grid.Row="1" VerticalAlignment="Top" Margin="0 5 0 0"/>
-                        <ScrollViewer Grid.Row="1" MaxHeight="280">
+                        <ScrollViewer Grid.Row="1" MaxHeight="280" Margin="0 10 0 0">
                             <RichTextBlock TextWrapping="Wrap" Margin="0 10 0 0" >
                                 <Paragraph >
                                     <Run Text="{Binding Selected.Text}"/>
@@ -90,6 +93,7 @@
                     </Grid>
                 </Expander.Content>
             </Expander>
+            <!--About-->
             <Grid Grid.Row="3">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
@@ -99,7 +103,7 @@
                     <TextBlock Text="About this app" Style="{StaticResource BaseTextBlockStyle}" Margin="0 0 0 5"/>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="ItemChecker" Margin="0 0 3 0"/>
-                        <TextBlock Text="{Binding Settings.Version}"/>
+                        <TextBlock Text="{Binding Version}"/>
                     </StackPanel>
                     <TextBlock Text="&#169; 2018-2023 baht0. Rasim Bakhtiyarov"/>
                 </StackPanel>
