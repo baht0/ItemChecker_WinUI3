@@ -7,6 +7,8 @@ using ItemChecker.ViewModels.AccountViewModels;
 using System.Linq;
 using Microsoft.UI.Xaml.Navigation;
 using CommunityToolkit.WinUI.UI.Controls;
+using Windows.System;
+using ItemChecker.Models;
 
 namespace ItemChecker.Views.Account
 {
@@ -16,13 +18,22 @@ namespace ItemChecker.Views.Account
         public InventoryPage()
         {
             this.InitializeComponent();
-            ViewModel.MessageBar = new();
             DataContext = ViewModel;
+            ViewModel.MessageEvent += MessageShow_Handler;
         }
-        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            ViewModel.MessageBar = null;
-            base.OnNavigatingFrom(e);
+            ViewModel.MessageEvent -= MessageShow_Handler;
+            base.OnNavigatedFrom(e);
+        }
+
+        private void MessageShow_Handler(object sender, EventArgs e)
+        {
+            var args = (MessageEventArgs)e;
+            MessageBar.Severity = (InfoBarSeverity)args.Icon;
+            MessageBar.Title = args.Title;
+            MessageBar.Message = args.Message;
+            MessageTip.IsOpen = true;
         }
 
         private void Sell_Click(object sender, RoutedEventArgs e) => SellShowDialogAsync();
@@ -44,34 +55,6 @@ namespace ItemChecker.Views.Account
             if (result == ContentDialogResult.Primary)
                 ViewModel.SellItemsCommand.Execute(null);
         }
-
-        private void Interval_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var cmb = sender as ComboBox;
-            if (BeginCalendar != null && EndCalendar != null)
-            {
-                EndCalendar.MaxDate = DateTime.Now;
-                BeginCalendar.Date = EndCalendar.Date = null;
-                BeginCalendar.IsEnabled = EndCalendar.IsEnabled = (string)cmb?.SelectedItem == "Custom";
-            }
-            ViewModel.SwitchIntervalCommand.Execute(cmb?.SelectedIndex);
-        }
-        private void BeginCalendar_DateChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args)
-        {
-            var date = sender.Date.GetValueOrDefault().DateTime;
-            ViewModel.BeginIntervalCommand.Execute(date);
-        }
-        private void EndCalendar_DateChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args)
-        {
-            var date = sender.Date.GetValueOrDefault().DateTime;
-            ViewModel.EndIntervalCommand.Execute(date);
-        }
-        private void ListViewSwipeContainer_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            if (e.Pointer.PointerDeviceType == Microsoft.UI.Input.PointerDeviceType.Mouse || e.Pointer.PointerDeviceType == Microsoft.UI.Input.PointerDeviceType.Pen)
-                VisualStateManager.GoToState(sender as Control, "HoverButtonsShown", true);
-        }
-        private void ListViewSwipeContainer_PointerExited(object sender, PointerRoutedEventArgs e) => VisualStateManager.GoToState(sender as Control, "HoverButtonsHidden", true);
 
         private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
@@ -102,18 +85,19 @@ namespace ItemChecker.Views.Account
                 }
             }
         }
+        private void dataGrid_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.F1)
+            {
+                var item = ((DataGrid)sender).SelectedItem;
+                var mainWindow = (MainWindow)App.MainWindow;
+                mainWindow?.NavigationInvoke(item);
+            }
+        }
         private void dataGrid_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
             if (ViewModel.Items.Any())
                 ViewModel.OpenInCommand.Execute(((DataGrid)sender).SelectedIndex);
         }
-
-        private void MessageBar_Closing(TeachingTip sender, TeachingTipClosingEventArgs args)
-        {
-            ViewModel.MessageBar.IsOpen = false;
-            //ViewModel.MessageBar = null;
-            //ViewModel.MessageBar = new();
-        }
-
     }
 }

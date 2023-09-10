@@ -24,7 +24,7 @@
         <!--Actions-->
         <StackPanel Orientation="Horizontal">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Found:" FontSize="16" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+                <TextBlock Text="Items:" FontSize="16" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
                 <TextBlock Text="{Binding Items.Count}" FontSize="16" Margin="3 0 4 0" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
             </StackPanel>
             <CommandBar HorizontalAlignment="Left" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
@@ -81,10 +81,6 @@
         </CommandBar>
         <!--Body-->
         <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="270"/>
-            </Grid.ColumnDefinitions>
             <Grid>
                 <Grid.Resources>
                     <Style TargetType="TextBlock">
@@ -136,7 +132,7 @@
                 <controls:DataGrid x:Name="dataGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                                        HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" AlternatingRowBackground="{ThemeResource SurfaceStrokeColorFlyoutBrush}" IsEnabled="True"
                                        AlternatingRowForeground="{ThemeResource AppBarItemForegroundThemeBrush}" AreRowDetailsFrozen="True" ItemsSource="{Binding Items}"
-                                        AreRowGroupHeadersFrozen="False" DoubleTapped="dataGrid_DoubleTapped"
+                                        AreRowGroupHeadersFrozen="False" DoubleTapped="dataGrid_DoubleTapped" KeyDown="dataGrid_KeyDown"
                                         AutoGenerateColumns="False"
                                         CanUserSortColumns="True"
                                         CanUserReorderColumns="False"
@@ -189,108 +185,10 @@
                     <AutoSuggestBox PlaceholderText="Type a item name" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextChanged="AutoSuggestBox_TextChanged"/>
                 </Grid>
             </Grid>
-            <!--Records-->
-            <Grid Grid.Column="1" Margin="5 0 0 0" CornerRadius="{ThemeResource ControlCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderThickness="1"
-                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Padding="6" HorizontalAlignment="Stretch" MinHeight="48">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
-                <!--List-->
-                <ListView x:Name="RecordsListView" SelectionMode="Single" ItemsSource="{Binding Records.Items}">
-                    <ListView.Header>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="Records:" FontSize="14" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="5 0 3 0"/>
-                            <TextBlock Text="{Binding Records.Items.Count}" FontSize="14" Style="{ThemeResource SubtitleTextBlockStyle}"/>
-                        </StackPanel>
-                    </ListView.Header>
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <UserControl PointerEntered="ListViewSwipeContainer_PointerEntered" PointerExited="ListViewSwipeContainer_PointerExited">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <VisualStateManager.VisualStateGroups>
-                                        <VisualStateGroup x:Name="HoveringStates">
-                                            <VisualState x:Name="HoverButtonsHidden" />
-                                            <VisualState x:Name="HoverButtonsShown">
-                                                <VisualState.Setters>
-                                                    <Setter Target="BalanceTxt.Visibility" Value="Visible" />
-                                                    <Setter Target="SumOfItemsTxt.Visibility" Value="Visible" />
-                                                    <Setter Target="Balance.Visibility" Value="Visible" />
-                                                    <Setter Target="SumOfItems.Visibility" Value="Visible" />
-                                                </VisualState.Setters>
-                                            </VisualState>
-                                        </VisualStateGroup>
-                                    </VisualStateManager.VisualStateGroups>
-                                    <SwipeControl x:Name="ListViewSwipeContainer" >
-                                        <Grid VerticalAlignment="Center">
-                                            <StackPanel VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding DateTime, Converter={StaticResource DateTimeConverter}}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
-                                                <TextBlock Text="Balance:" VerticalAlignment="Center" FontSize="12" x:Name="BalanceTxt" Visibility="Collapsed"
-                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                                <TextBlock Text="Sum of items:" VerticalAlignment="Center" FontSize="12" x:Name="SumOfItemsTxt" Visibility="Collapsed"
-                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                            </StackPanel>
-                                            <StackPanel HorizontalAlignment="Right" Margin="0 5 0 5">
-                                                <TextBlock Text="{Binding Total}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
-                                                <TextBlock Text="{Binding Balance}" VerticalAlignment="Center" FontSize="12" x:Name="Balance" Visibility="Collapsed"
-                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                                <TextBlock Text="{Binding SumOfItems}" VerticalAlignment="Center"  FontSize="12" x:Name="SumOfItems" Visibility="Collapsed"
-                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </SwipeControl>
-                                </Grid>
-                            </UserControl>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-                <!--Interval-->
-                <Expander Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 5 0 0" IsExpanded="False" ExpandDirection="Up" HorizontalContentAlignment="Stretch">
-                    <Expander.Header>
-                        <StackPanel Orientation="Horizontal">
-                            <FontIcon Glyph="&#xE787;" FontSize="16" VerticalAlignment="Center" Margin="5 0 20 0"/>
-                            <TextBlock Text="Date interval"/>
-                        </StackPanel>
-                    </Expander.Header>
-                    <Expander.Content>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <ComboBox Grid.Row="0" HorizontalAlignment="Stretch" SelectedIndex="0" ItemsSource="{Binding Records.Intervals}" SelectionChanged="Interval_SelectionChanged"/>
-                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0 10 0 10">
-                                <CalendarDatePicker PlaceholderText="Beginning" Width="106" x:Name="BeginCalendar" IsEnabled="False" DateChanged="BeginCalendar_DateChanged"/>
-                                <CalendarDatePicker PlaceholderText="Ending" Width="106" x:Name="EndCalendar" Margin="5 0 0 0" IsEnabled="False" DateChanged="EndCalendar_DateChanged"/>
-                            </StackPanel>
-                            <StackPanel HorizontalAlignment="Left" Grid.Row="2">
-                                <TextBlock Grid.Row="0" Text="Begin:"/>
-                                <TextBlock Grid.Row="1" Text="End:"/>
-                                <TextBlock Grid.Row="2" Text="AVG:"/>
-                                <TextBlock Grid.Row="3" Text="Difference:"/>
-                                <TextBlock Grid.Row="4" Text="Precent:"/>
-                            </StackPanel>
-                            <StackPanel HorizontalAlignment="Right" Grid.Row="2">
-                                <TextBlock Grid.Row="0" Text="{Binding Records.Result.StartBalance}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                <TextBlock Grid.Row="1" Text="{Binding Records.Result.EndBalance}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                <TextBlock Grid.Row="2" Text="{Binding Records.Result.AvgBalance}"  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                <TextBlock Grid.Row="3" Text="{Binding Records.Result.Difference}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                <TextBlock Grid.Row="4" Text="{Binding Records.Result.Precent}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                            </StackPanel>
-                        </Grid>
-                    </Expander.Content>
-                </Expander>
-            </Grid>
         </Grid>
         <!--Message-->
-        <TeachingTip PreferredPlacement="Top" IsOpen="{Binding MessageBar.IsOpen}" IsLightDismissEnabled="True" Closing="MessageBar_Closing" PlacementMargin="0 10 0 0" x:Name="MessageBar">
-            <InfoBar IsOpen="True" Severity="{Binding MessageBar.Severity}" Title="{Binding MessageBar.Title}" Message="{Binding MessageBar.Message}"
-                     VerticalAlignment="Center" IsClosable="False"/>
+        <TeachingTip PreferredPlacement="Top" IsLightDismissEnabled="True" PlacementMargin="0 10 0 0" x:Name="MessageTip">
+            <InfoBar IsOpen="True" VerticalAlignment="Center" IsClosable="False" x:Name="MessageBar"/>
         </TeachingTip>
     </Grid>
 </Page>
