@@ -2,15 +2,22 @@
 using ItemChecker.Models.BuyOrders;
 using ItemChecker.Models.StaticModels;
 using ItemChecker.Net;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ItemChecker.Views.Database;
 
 namespace ItemChecker.Models
 {
     public class BuyOrderTool
     {
+        public static string QueueService { get; set; } = "Unknown";
+        public static List<string> Queue { get; set; } = new();
+
         public double MaxOrderAmount => SteamAccount.Balance * 10;
         public double AvailableAmount
         {
@@ -24,10 +31,10 @@ namespace ItemChecker.Models
 
         private OrdersParameters Parameters { get; set; }
         private List<BuyOrderData> Orders { get; set; } = new();
+
         public async Task<List<BuyOrderData>> GetOrders(OrdersParameters parameters)
         {
             Parameters = parameters;
-            Orders = new();
             HtmlDocument htmlDoc = new();
             htmlDoc.LoadHtml(await SteamRequest.Get.RequestAsync("https://steamcommunity.com/market/"));
             int index = htmlDoc.DocumentNode.SelectSingleNode("//div[@class='my_listing_section market_content_block market_home_listing_table']/h3/span[1]").InnerText.Trim() != "My listings awaiting confirmation" ? 1 : 2;
@@ -38,21 +45,30 @@ namespace ItemChecker.Models
             {
                 foreach (HtmlNode item in items)
                 {
-                    BuyOrderData data = new(item, parameters.ServiceId);
-                    if (IsAllow(data))
+                    var itemName = item.SelectSingleNode(".//div[4]/span/a").InnerText.Trim();
+                    var data = Orders.FirstOrDefault(x => x.ItemName == itemName);
+                    if (data != null)
                     {
-                        Orders.Add(data);
+                        data.GetItemData(item, parameters.ServiceId);
+                        if (!IsAllow(data))
+                            await data.Cancel();
                     }
                     else
                     {
-                        data.Cancel();
+                        data = new BuyOrderData(item, parameters.ServiceId);
+                        if (IsAllow(data))
+                            Orders.Add(data);
+                        else
+                            await data.Cancel();
                     }
                     min ??= data;
                     min = data.Precent < min.Precent ? data : min;
                 }
                 if (min != null && AvailableAmount < (MaxOrderAmount * 0.01d))
-                    min.Cancel();
+                    await min.Cancel();
             }
+            else
+                Orders = new();
             return Orders;
         }
         private bool IsAllow(BuyOrderData data)
@@ -76,14 +92,34 @@ namespace ItemChecker.Models
                         break;
                 }
             }
+            if (isAllow)
+                isAllow = data.IsCanceled != BaseConfig.ActionStatus.OK;
 
             return isAllow;
         }
 
-        public async void PlaceOrders()
+        public static async Task ExportQueue()
         {
-            if (AvailableAmount < MaxOrderAmount * 0.15d)
-                return;
+            var itemsArray = JArray.Parse(JsonConvert.SerializeObject(Queue, Formatting.Indented));
+
+            JObject json = new(
+                new JProperty("Size", Queue.Count),
+                new JProperty("Service", QueueService),
+                new JProperty("Items", itemsArray));
+
+            await File.WriteAllTextAsync(AppConfig.DocumentPath + $"queue.json", json.ToString());
+        }
+        public static async Task ImportQueue()
+        {
+            string path = AppConfig.DocumentPath + "queue.json";
+
+            if (File.Exists(path))
+            {
+                var json = JObject.Parse(await File.ReadAllTextAsync(path));
+
+                Queue = json["Items"].ToObject<List<string>>();
+                QueueService = json["Service"].ToString();
+            }
         }
     }
 }
