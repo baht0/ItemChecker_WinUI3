@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Controls;
+using System;
 
 namespace ItemChecker.Models
 {
@@ -28,15 +29,17 @@ namespace ItemChecker.Models
             Message = message;
         }
     }
-    public partial class MessageBar : ObservableObject
+    public class MessageEventArgs : EventArgs
     {
-        [ObservableProperty]
-        bool _isOpen;
-        [ObservableProperty]
-        InfoBarSeverity _severity = InfoBarSeverity.Informational;
-        [ObservableProperty]
-        string _title = string.Empty;
-        [ObservableProperty]
-        string _message = string.Empty;
+        public string Title { get; set; }
+        public string Message { get; set; }
+        public int Icon { get; set; }
+
+        public MessageEventArgs(string title, string message, int icon)
+        {
+            Title = title;
+            Message = message;
+            Icon = icon;
+        }
     }
 }
