@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ItemChecker.Net.Session
+﻿namespace ItemChecker.Net.Session
 {
     internal class PollResponse
     {

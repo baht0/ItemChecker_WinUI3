@@ -1,18 +1,23 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 
 namespace ItemChecker.Net.Session
 {
+    enum EAuthSessionGuardType
+    {
+        Unknown = 0,
+        None = 1,
+        EmailCode = 2,
+        DeviceCode = 3,
+        DeviceConfirmation = 4,
+        EmailConfirmation = 5,
+        MachineToken = 6
+    }
     internal class StartResponse
     {
         public string ClientId { get; set; }
         public string RequestId { get; set; }
         public string Interval { get; set; }
         public List<EAuthSessionGuardType> AllowedConfirmations { get; set; }
-        public string SteamId { get; set; }
-        public string WeakToken { get; set; }
-        public string ExtendedErrorMessage { get; set; }
 
         internal static List<EAuthSessionGuardType> GetAllowedConfirmations(JArray array)
         {
@@ -25,14 +30,15 @@ namespace ItemChecker.Net.Session
             return list;
         }
     }
-    enum EAuthSessionGuardType
+    internal class LoginPassResponse : StartResponse
     {
-        Unknown = 0,
-        None = 1,
-        EmailCode = 2,
-        DeviceCode = 3,
-        DeviceConfirmation = 4,
-        EmailConfirmation = 5,
-        MachineToken = 6
+        public string SteamId { get; set; }
+        public string WeakToken { get; set; }
+        public string ExtendedErrorMessage { get; set; }
+    }
+    internal class LoginQrResponse : StartResponse
+    {
+        public string ChallengeUrl { get; set; }
+        public int Version { get; set; }
     }
 }

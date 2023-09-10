@@ -6,10 +6,10 @@ namespace ItemChecker.Net.Session
 {
     internal class RsaPassword : HttpRequest
     {
-        public string Mod { get; set; }
-        public string Exp { get; set; }
-        public string TimeStamp { get; set; }
-        public string EncryptedPassword { get; set; }
+        private string Mod { get; set; }
+        private string Exp { get; set; }
+        public string TimeStamp { get; private set; }
+        public string EncryptedPassword { get; private set; }
 
         internal async Task<RsaPassword> GetEncryptedPasswordAsync(string accountName, string password)
         {
