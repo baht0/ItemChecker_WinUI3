@@ -12,17 +12,17 @@ namespace ItemChecker.Models.StartUp
     internal partial class SelectCurrency : ObservableObject
     {
         [ObservableProperty]
-        bool _isCurrencyShow;
+        bool isCurrencyShow;
         [ObservableProperty]
-        ObservableCollection<DataCurrency> _currencyList = new();
+        ObservableCollection<DataCurrency> currencyList = new();
         [ObservableProperty]
-        DataCurrency _selectedCurrency = new();
+        DataCurrency selectedCurrency = new();
 
         public async Task MainAsync()
         {
             await Currencies.GetSteamCurrenciesAsync();
 
-            if (AppProperties.User.SteamCurrencyId == 0)
+            if (AppProperties.Account.SteamCurrencyId == 0)
             {
                 CurrencyList = new(Currencies.All);
                 SelectedCurrency = Currencies.All.FirstOrDefault();
@@ -35,12 +35,12 @@ namespace ItemChecker.Models.StartUp
                 });
             }
             else
-                _ = SteamAccount.SetCurrencyAsync(AppProperties.User.SteamCurrencyId);
+                _ = SteamAccount.SetCurrencyAsync(AppProperties.Account.SteamCurrencyId);
         }
         public void SubmitCurrency(DataCurrency currency)
         {
-            AppProperties.User.SteamCurrencyId = currency.Id;
-            _ = SteamAccount.SetCurrencyAsync(AppProperties.User.SteamCurrencyId);
+            AppProperties.Account.SteamCurrencyId = currency.Id;
+            _ = SteamAccount.SetCurrencyAsync(AppProperties.Account.SteamCurrencyId);
             IsCurrencyShow = false;
         }
     }

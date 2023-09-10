@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Timers;
 using Newtonsoft.Json.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using static ItemChecker.Net.SteamRequest;
@@ -14,53 +13,75 @@ namespace ItemChecker.Model.StartUp
     public partial class SignIn : ObservableObject
     {
         [ObservableProperty]
-        private string _accountName = string.Empty;
+        private string accountName = string.Empty;
 
         [ObservableProperty]
-        private bool _isErrorShow;
+        private string qrUrl = string.Empty;
 
         [ObservableProperty]
-        private bool _isSignInShow;
-        [ObservableProperty]
-        bool _isSubmitShow;
-        [ObservableProperty]
-        bool _isSubmitEnabled = true;
+        private bool isErrorShow;
 
         [ObservableProperty]
-        bool _isConfirmationShow;
+        private bool isSignInShow;
         [ObservableProperty]
-        bool _isCodeEnabled = true;
+        private bool isSubmitShow;
         [ObservableProperty]
-        private bool _isExpiredShow;
+        private bool isSubmitEnabled = true;
+
         [ObservableProperty]
-        private string _remaining = "05 min. 00 sec.";
+        private bool isConfirmationShow;
         [ObservableProperty]
-        private string _errorMess = "Invalid code.";
+        private bool isCodeEnabled = true;
+        [ObservableProperty]
+        private bool isExpiredShow;
+        [ObservableProperty]
+        private string remaining = "05 min. 00 sec.";
+        [ObservableProperty]
+        private string errorMess = "Invalid code.";
 
         bool IsSubmitted { get; set; }
-        bool IsSetToken { get; set; }
-        System.Timers.Timer Timer { get; set; } = new(1000);
-        int TimerTick { get; set; } = 300;
+        bool IsSetToken => Session.IsSetToken;
+        int TimerSubmit { get; set; } = 300;
 
         public async Task MainAsync()
         {
             var isAuthorized = await Session.IsAuthorizedAsync();
             if (!isAuthorized)
             {
+                QrUrl = await Session.BeginAuthSessionViaQR();
+                ResetQr();
+                Session.CheckAuthStatus();
+
                 IsSubmitShow = true;
                 IsSignInShow = true;
 
-                await Task.Run(() =>
+                while (!IsSetToken)
                 {
-                    while (!IsSubmitted || !IsSetToken)
-                        Thread.Sleep(100);
-                });
+                    await Task.Delay(100);
+                }
 
                 IsSignInShow = false;
                 IsConfirmationShow = false;
             }
         }
 
+        //Login with QR
+        private async void ResetQr()
+        {
+            int timer = 20;
+            while (!IsSetToken)
+            {
+                if (timer <= 0)
+                {
+                    QrUrl = await Session.BeginAuthSessionViaQR();
+                    timer = 20;
+                }
+                timer--;
+                await Task.Delay(1000);
+            }
+        }
+
+        //Login with pass
         public async void Submit(string pass)
         {
             try
@@ -76,8 +97,7 @@ namespace ItemChecker.Model.StartUp
                         IsSubmitted = await Session.SubmitSignIn(AccountName, pass);
                         if (IsSubmitted)
                         {
-                            Timer.Elapsed += SessionTimerTick;
-                            Timer.Enabled = true;
+                            SubmitRemaining();
 
                             IsErrorShow = false;
                             IsSubmitShow = false;
@@ -99,6 +119,42 @@ namespace ItemChecker.Model.StartUp
 
             }            
         }
+        private async void SubmitRemaining()
+        {
+            while (TimerSubmit > 0)
+            {
+                TimerSubmit--;
+                Remaining = TimeSpan.FromSeconds(TimerSubmit).ToString("mm' min. 'ss' sec.'");
+                if (IsSetToken)
+                    break;
+                else if (!IsCodeEnabled && !IsSetToken)
+                {
+                    IsCodeEnabled = true;
+                    IsErrorShow = true;
+                }
+                await Task.Delay(1000);
+            }
+            if (TimerSubmit <= 0)
+            {
+                IsExpiredShow = true;
+                IsCodeEnabled = false;
+                ErrorMess = "The sign in request has expired. Restart to login.";
+            }
+        }
+        public async void SubmitCode(string code)
+        {
+            try
+            {
+                IsErrorShow = false;
+                await Session.SubmitCode(code);
+                IsCodeEnabled = false;
+            }
+            catch
+            {
+
+            }
+        }
+
         async Task<bool> AllowUserAsync(string login)
         {
             JArray users = JArray.Parse(await DropboxRequest.Get.ReadAsync("Users.json"));
@@ -115,58 +171,6 @@ namespace ItemChecker.Model.StartUp
                 return Convert.ToBoolean(user["Allowed"]);
             }
             return false;
-        }
-        async void SessionTimerTick(Object sender, ElapsedEventArgs e)
-        {
-            TimerTick--;
-            var win = (MainWindow)App.MainWindow;
-            win.DispatcherQueue.TryEnqueue(() =>
-            {
-                var time = TimeSpan.FromSeconds(TimerTick);
-                Remaining = time.ToString("mm' min 'ss' sec.'");
-            });
-            if (TimerTick % 5 == 0)
-            {
-                IsSetToken = await Session.CheckAuthStatus();                
-                if (IsSetToken)
-                {
-                    Timer.Enabled = false;
-                    Timer.Elapsed -= SessionTimerTick;
-                }
-                else if(!IsCodeEnabled && !IsSetToken)
-                {
-                    win.DispatcherQueue.TryEnqueue(() =>
-                    {
-                        IsCodeEnabled = true;
-                        IsErrorShow = true;
-                    });
-                }
-            }
-            else if (TimerTick <= 0)
-            {
-                win.DispatcherQueue.TryEnqueue(() =>
-                {
-                    IsExpiredShow = true;
-                    IsCodeEnabled = false;
-                    ErrorMess = "The sign in request has expired. Restart to login.";
-                });
-                Timer.Enabled = false;
-                Timer.Elapsed -= SessionTimerTick;
-            }
-        }
-
-        public async void SubmitCode(string code)
-        {
-            try
-            {
-                IsErrorShow = false;
-                await Session.SubmitCode(code);
-                IsCodeEnabled = false;
-            }
-            catch
-            {
-
-            }
         }
     }
 }
