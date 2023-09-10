@@ -1,59 +1,48 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ItemChecker.Models;
-using Microsoft.UI.Xaml.Controls;
+using ItemChecker.Models.StaticModels;
+using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace ItemChecker.ViewModels
 {
     public partial class DatabaseViewModel : ObservableObject
     {
         [ObservableProperty]
-        ObservableCollection<TabViewItem> _tabs = new(Database.Items);
+        ObservableCollection<Item> baseItems = new(ItemBase.List);
         [ObservableProperty]
-        TabViewItem _selectedTab = Database.SelectedItem;
+        DateTime baseUpdated = ItemBase.Updated;
 
-        public DatabaseViewModel(object page)
-        {
-            if (Tabs.Count == 0)
-                NewTab(page);
-            if (SelectedTab.Header == null)
-                SelectedTab = Tabs.LastOrDefault();
-        }
+        [ObservableProperty]
+        ObservableCollection<object> tabs = new(Database.Items);
+        [ObservableProperty]
+        int selectedId = 0;
 
         [RelayCommand]
-        private void NewTab(object page) => AddNewTab(page);
-        private void AddNewTab(object page)
+        private void AddPage(object[] obj)
         {
-            var tab = new TabViewItem()
+            var id = (int)obj[0];
+
+            if (id == -1)
             {
-                Header = "New Tab",
-                IconSource = new SymbolIconSource() { Symbol = Symbol.Document },
-                Content = page
-            };
-            Tabs.Add(tab);
-            SelectedTab = tab;
+                Tabs.Add(obj[1]);
+                Database.Items.Add(obj[1]);
+                id = Database.Items.Count - 1;
+            }
+            SelectedId = id;
         }
         [RelayCommand]
-        private void AddItem(TabViewItem item)
+        private void ClosePage(object page)
         {
-            Tabs.Add(item);
-            Database.Items.Add(item);
-            SelectedTab = item;
+            Tabs.Remove(page);
+            Database.Items.Remove(page);
         }
         [RelayCommand]
-        private void CloseTab(TabViewItem tab)
-        {
-            Tabs.Remove(tab);
-            Database.Items.Remove(tab);
-        }
-        [RelayCommand]
-        private void CloseTabs(object page)
+        private void CloseAllPage()
         {
             Tabs.Clear();
             Database.Items.Clear();
-            AddNewTab(page);
         }
     }
 }

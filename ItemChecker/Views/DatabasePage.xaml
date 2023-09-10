@@ -3,28 +3,74 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ItemChecker.Views"
+    xmlns:conv="using:ItemChecker.Converter"
     xmlns:viewmodel="using:ItemChecker.ViewModels"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" Loaded="Page_Loaded"
+    mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Type=viewmodel:DatabaseViewModel}">
-    <TabView x:Name="MainTabView" VerticalAlignment="Stretch" TabItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTab, Mode=TwoWay}"
-             AddTabButtonClick="TabView_AddButtonClick" TabCloseRequested="TabView_TabCloseRequested">
-        <TabView.TabStripFooter>
-            <Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="29" Width="40"
-                    ToolTipService.ToolTip="Close all tabs" Style="{StaticResource CommandBarFlyoutEllipsisButtonStyle}">
-                <Button.Content>
-                    <FontIcon Glyph="&#xE711;" FontSize="11"/>
-                </Button.Content>
-                <Button.Flyout>
-                    <Flyout>
-                        <StackPanel>
-                            <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="Do you really want?" Margin="0,0,0,12" />
-                            <Button Content="Yes, close" Click="CloseTabs_Click"/>
-                        </StackPanel>
-                    </Flyout>
-                </Button.Flyout>
-            </Button>
-        </TabView.TabStripFooter>
-    </TabView>
+    <Page.Resources>
+        <conv:DateTimeConverter x:Key="DateTimeConverter"/>
+        <conv:IntToBooleanReverseConverter x:Key="IntToBooleanReverseConverter"/>
+        <conv:IntToBooleanConverter x:Key="IntToBooleanConverter"/>
+    </Page.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <!--Search-->
+        <AutoSuggestBox Grid.Column="1" PlaceholderText="Search or enter an item name" QueryIcon="Find" VerticalAlignment="Top" Margin="0 10 0 5" HorizontalAlignment="Stretch"
+                        x:Name="searchSuggest" TextChanged="searchSuggest_TextChanged" QuerySubmitted="searchSuggest_QuerySubmitted" SuggestionChosen="searchSuggest_SuggestionChosen">
+            <AutoSuggestBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding ItemName}"/>
+                </DataTemplate>
+            </AutoSuggestBox.ItemTemplate>
+        </AutoSuggestBox>
+        <!--TabView-->
+        <TabView Grid.Row="1" x:Name="MainTabView" VerticalAlignment="Stretch" CloseButtonOverlayMode="OnPointerOver" IsAddTabButtonVisible="False" Margin="-5 0 -5 0" IsTabStop="True"
+                  TabItemsSource="{Binding Tabs}" SelectedIndex="{Binding SelectedId, Mode=TwoWay}" TabCloseRequested="TabView_TabCloseRequested">
+            <TabView.TabStripFooter>
+                <Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="29" Width="40" ToolTipService.ToolTip="Close all tabs" Style="{StaticResource CommandBarFlyoutEllipsisButtonStyle}"
+                        IsEnabled="{Binding Tabs.Count, Converter={StaticResource IntToBooleanConverter}}" x:Name="dd">
+                    <Button.Content>
+                        <FontIcon Glyph="&#xE711;" FontSize="11"/>
+                    </Button.Content>
+                    <Button.Flyout>
+                        <Flyout Placement="Left">
+                            <StackPanel>
+                                <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="Do you really want?" Margin="0,0,0,12" />
+                                <Button Content="Yes, close" Click="CloseTabs_Click"/>
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+            </TabView.TabStripFooter>
+        </TabView>
+        <!--Info-->
+        <Grid Grid.Row="1" Margin="0 100 0 10" MinWidth="250" MaxWidth="700" Visibility="{Binding Tabs.Count, Converter={StaticResource IntToBooleanReverseConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" CornerRadius="{ThemeResource ControlCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderThickness="1"
+                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Padding="10" HorizontalAlignment="Stretch" MinHeight="48">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <FontIcon Glyph="&#xE946;" FontSize="16" VerticalAlignment="Center" Margin="10 0 20 0"/>
+                <StackPanel VerticalAlignment="Center" Grid.Column="1" HorizontalAlignment="Stretch" Margin="0,0,16,0">
+                    <TextBlock Text="Count:" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    <TextBlock Text="Updated:" VerticalAlignment="Center" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" Grid.Column="2" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding BaseItems.Count}" VerticalAlignment="Center" TextAlignment="Right" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    <TextBlock Text="{Binding BaseUpdated, Converter={StaticResource DateTimeConverter}}" VerticalAlignment="Center" TextAlignment="Right" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
 </Page>
