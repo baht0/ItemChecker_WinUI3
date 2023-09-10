@@ -14,59 +14,20 @@ namespace ItemChecker.Views.Parser
 
         private void Service1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var cmb = sender as ComboBox;
-            if (cmb != null)
-                CreateButtons(cmb.SelectedIndex);
-        }
-        void CreateButtons(int serviceOneId)
-        {
-            configGrid.Children.Clear();
-            string[] bind = new string[] { "Normal", "Souvenir", "Unique", string.Empty, "Stattrak", "UniqueStattrak" };
-            string[] content = new string[] { "Normal", "Souvenir", "★", string.Empty, "StatTrak™", "★ StatTrak™" };
-            content[3] = bind[3] = serviceOneId == 4 || serviceOneId == 5 ? "All" : "NotWeapon";
-            for (int i = 0; i < content.Length; i++)
+            int cmbId = Service1Cmb.SelectedIndex;
+            if (Service1Cmb != null)
             {
-                dynamic check = serviceOneId == 4 || serviceOneId == 5 ? new RadioButton() : new CheckBox();
-                check.Content = content[i];
-                var binding = new Binding
-                {
-                    Path = new PropertyPath(bind[i]),
-                    Mode = BindingMode.TwoWay,
-                };
-                if (serviceOneId == 4 || serviceOneId == 5)
-                    check.SetBinding(RadioButton.IsCheckedProperty, binding);
-                else
-                    check.SetBinding(CheckBox.IsCheckedProperty, binding);
-
-                configGrid.Children.Add(check);
-                switch (i)
-                {
-                    case 0:
-                        Grid.SetRow(check, 0);
-                        Grid.SetColumn(check, 0);
-                        break;
-                    case 1:
-                        Grid.SetRow(check, 1);
-                        Grid.SetColumn(check, 0);
-                        break;
-                    case 2:
-                        Grid.SetRow(check, 2);
-                        Grid.SetColumn(check, 0);
-                        break;
-                    case 3:
-                        Grid.SetRow(check, 0);
-                        Grid.SetColumn(check, 1);
-                        break;
-                    case 4:
-                        Grid.SetRow(check, 1);
-                        Grid.SetColumn(check, 1);
-                        break;
-                    case 5:
-                        Grid.SetRow(check, 2);
-                        Grid.SetColumn(check, 1);
-                        break;
-                }
+                All.Visibility = Info.Visibility = cmbId == 4 || cmbId == 5 ? Visibility.Visible : Visibility.Collapsed;
+                NotWeapon.Visibility = cmbId != 4 && cmbId != 5 ? Visibility.Visible : Visibility.Collapsed;
             }
+            if (Service2Cmb.SelectedIndex == cmbId)
+                Service2Cmb.SelectedIndex = cmbId > 0 ? 0 : 1;
+        }
+        private void Service2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int cmbId = Service2Cmb.SelectedIndex;
+            if (Service1Cmb.SelectedIndex == cmbId)
+                Service1Cmb.SelectedIndex = cmbId > 0 ? 0 : 1;
         }
         private void MinPrice_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
         {
@@ -77,6 +38,22 @@ namespace ItemChecker.Views.Parser
         {
             if (sender.Value < MinPrice.Value)
                 MinPrice.Value = sender.Value;
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            string name = ((CheckBox)sender).Name.ToString();
+            int cmbId = Service1Cmb.SelectedIndex;
+            if (cmbId == 4 || cmbId == 5)
+            {
+                All.IsChecked = name == "All";
+                NotWeapon.IsChecked = name == "NotWeapon";
+                Normal.IsChecked = name == "Normal";
+                Souvenir.IsChecked = name == "Souvenir";
+                Unique.IsChecked = name == "Unique";
+                Stattrak.IsChecked = name == "Stattrak";
+                UniqueStattrak.IsChecked = name == "UniqueStattrak";
+            }
         }
     }
 }
