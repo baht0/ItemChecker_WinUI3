@@ -1,14 +1,17 @@
 using CommunityToolkit.WinUI.UI.Controls;
+using ItemChecker.Models;
 using ItemChecker.ViewModels;
 using ItemChecker.Views.Rare;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.System;
 
 namespace ItemChecker.Views
 {
@@ -19,6 +22,21 @@ namespace ItemChecker.Views
         {
             this.InitializeComponent();
             DataContext = ViewModel;
+            ViewModel.MessageEvent += MessageShow_Handler;
+        }
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            ViewModel.MessageEvent -= MessageShow_Handler;
+            base.OnNavigatedFrom(e);
+        }
+
+        private void MessageShow_Handler(object sender, EventArgs e)
+        {
+            var args = (MessageEventArgs)e;
+            MessageBar.Severity = (InfoBarSeverity)args.Icon;
+            MessageBar.Title = args.Title;
+            MessageBar.Message = args.Message;
+            MessageTip.IsOpen = true;
         }
 
         private void Start_Click(object sender, RoutedEventArgs e) => CheckShowDialogAsync();
@@ -49,7 +67,6 @@ namespace ItemChecker.Views
         private void ItemsToggle_Click(object sender, RoutedEventArgs e) => ItemsPage.Visibility = ItemsPage.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
 
         private void InfoBar_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e) => ViewModel.ResetTimeCommand.Execute(null);
-        private void MessageBar_Closing(TeachingTip sender, TeachingTipClosingEventArgs args) => ViewModel.MessageBar.IsOpen = false;
 
         private void dataGrid_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
@@ -74,6 +91,15 @@ namespace ItemChecker.Views
                 {
                     dgColumn.SortDirection = null;
                 }
+            }
+        }
+        private void dataGrid_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.F1)
+            {
+                var item = ((DataGrid)sender).SelectedItem;
+                var mainWindow = (MainWindow)App.MainWindow;
+                mainWindow?.NavigationInvoke(item);
             }
         }
         private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
@@ -135,14 +161,23 @@ namespace ItemChecker.Views
                 itemsListView.ItemsSource = results;
             }
         }
+        private bool suggestionChosen = false;
         private void listSuggestAdd_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             if (args.CheckCurrent())
             {
                 var term = sender.Text.ToLower();
-                var results = ViewModel.RareItems.AddBase.Where(i => i.ItemName.ToLower().Contains(term)).ToList();
-                listSuggest.ItemsSource = results;
-                listSuggest.IsSuggestionListOpen = true;
+                if (!string.IsNullOrEmpty(term))
+                {
+                    var results = ViewModel.RareItems.AddBase.Where(i => i.ItemName.ToLower().Contains(term)).ToList();
+                    listSuggest.ItemsSource = results;
+                    listSuggest.IsSuggestionListOpen = true;
+                }
+                else if (suggestionChosen)//unfocus searchSuggest
+                {
+                    ItemsPage.Focus(FocusState.Programmatic);
+                    suggestionChosen = false;
+                }
             }
         }
         private void listSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
@@ -154,9 +189,10 @@ namespace ItemChecker.Views
         }
         private void listSuggest_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
         {
-            ViewModel.AddToListCommand.Execute(args.SelectedItem);
+            suggestionChosen = true;
             listSuggest.IsSuggestionListOpen = false;
             listSuggest.Text = string.Empty;
+            ViewModel.AddToListCommand.Execute(args.SelectedItem);
             AddListCommand();
         }
 

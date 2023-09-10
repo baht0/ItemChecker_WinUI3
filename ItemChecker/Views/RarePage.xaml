@@ -13,7 +13,7 @@
     d:DataContext="{d:DesignInstance Type=vm:RareViewModel}">
     <Page.Resources>
         <conv:BooleanReverseConverter x:Key="BooleanReverseConverter"/>
-        <conv:IsBoughtConverter x:Key="IsBoughtConverter"/>
+        <conv:ActionStatusConverter x:Key="ActionStatusConverter"/>
     </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -23,7 +23,7 @@
         <!--Actions-->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <StackPanel Orientation="Horizontal" Margin="0 0 5 0">
-                <TextBlock Text="Found:" Margin="0 0 3 0" FontSize="16" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+                <TextBlock Text="Items:" Margin="0 0 3 0" FontSize="16" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
                 <TextBlock Text="{Binding Items.Count}" FontSize="16" VerticalAlignment="Center" Style="{ThemeResource SubtitleTextBlockStyle}"/>
             </StackPanel>
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
@@ -138,7 +138,7 @@
                                             </Button.Flyout>
                                         </Button>
                                     </Grid>
-                                </Grid>                                
+                                </Grid>
                                 <StackPanel Grid.Row="1" Margin="0 10 0 0">
                                     <StackPanel Orientation="Horizontal">
                                         <StackPanel.Resources>
@@ -153,10 +153,11 @@
                                         <Image Source="{Binding Stickers[4].Url}" ToolTipService.ToolTip="{Binding Stickers[4].Name}"/>
                                     </StackPanel>
                                 </StackPanel>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                                    <TextBlock Text="{Binding IsBought, Converter={StaticResource IsBoughtConverter}, ConverterParameter=1}" Margin="0 0 5 0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top">
                                     <Button Content="Buy Now" HorizontalAlignment="Right" Style="{ThemeResource AccentButtonStyle}"
-                                            Command="{Binding BuyItemCommand}" IsEnabled="{Binding IsBought, Converter={StaticResource IsBoughtConverter}, ConverterParameter=0}"/>
+                                            Command="{Binding BuyItemCommand}" IsEnabled="{Binding IsBought, Converter={StaticResource ActionStatusConverter}, ConverterParameter=0}"/>
+                                    <TextBlock Text="{Binding IsBought, Converter={StaticResource ActionStatusConverter}, ConverterParameter=1}"
+                                               Margin="0 0 5 0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -165,7 +166,7 @@
                 <controls:DataGrid x:Name="dataGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                                        HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" AlternatingRowBackground="{ThemeResource SurfaceStrokeColorFlyoutBrush}" IsEnabled="True"
                                        AlternatingRowForeground="{ThemeResource AppBarItemForegroundThemeBrush}" AreRowDetailsFrozen="True" ItemsSource="{Binding Items}"
-                                        AreRowGroupHeadersFrozen="False" DoubleTapped="dataGrid_DoubleTapped"
+                                        AreRowGroupHeadersFrozen="False" DoubleTapped="dataGrid_DoubleTapped" KeyDown="dataGrid_KeyDown"
                                         AutoGenerateColumns="False"
                                         CanUserSortColumns="True"
                                         CanUserReorderColumns="False"
@@ -203,8 +204,9 @@
                         <ColumnDefinition/>
                         <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
-                    <AutoSuggestBox PlaceholderText="Type a item name" QueryIcon="Find" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextChanged="AutoSuggestBox_TextChanged"/>
-                    <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Grid.Column="1">
+                    <AutoSuggestBox PlaceholderText="Type a item name" QueryIcon="Find" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextChanged="AutoSuggestBox_TextChanged"
+                                    IsEnabled="{Binding LoadingBar.IsBusy, Converter={StaticResource BooleanReverseConverter}}"/>
+                    <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Grid.Column="1" IsEnabled="{Binding LoadingBar.IsBusy, Converter={StaticResource BooleanReverseConverter}}">
                         <AppBarButton Icon="Filter" Label="Filter" x:Name="FilterBtn">
                             <AppBarButton.Flyout>
                                 <MenuFlyout Placement="Bottom">
@@ -320,7 +322,7 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left">
                                                 <TextBlock Text="{Binding ItemName}" x:Name="ItemName" VerticalAlignment="Center"/>
-                                                <TextBlock Text="{Binding Service}" x:Name="TypeTxt" FontSize="11" VerticalAlignment="Center" Visibility="Collapsed" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                                <TextBlock Text="{Binding Service}" x:Name="TypeTxt" FontSize="11" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                             </StackPanel>
                                             <AppBarButton Grid.Column="1" IsTabStop="False" HorizontalAlignment="Right" LabelPosition="Collapsed" Width="45" Height="50" Icon="Delete" Visibility="Collapsed" Margin="5 0 0 0"
                                                   x:Name="HoverButton" Command="{Binding Command}" CommandParameter="{Binding}"/>
@@ -358,9 +360,8 @@
             </Grid>
         </Grid>
         <!--Message-->
-        <TeachingTip PreferredPlacement="Top" IsOpen="{Binding MessageBar.IsOpen}" IsLightDismissEnabled="True" Closing="MessageBar_Closing" PlacementMargin="0 10 0 0" x:Name="MessageBar">
-            <InfoBar IsOpen="True" Severity="{Binding MessageBar.Severity}" Title="{Binding MessageBar.Title}" Message="{Binding MessageBar.Message}"
-                     VerticalAlignment="Center" IsClosable="False"/>
+        <TeachingTip PreferredPlacement="Top" IsLightDismissEnabled="True" PlacementMargin="0 10 0 0" x:Name="MessageTip">
+            <InfoBar IsOpen="True" VerticalAlignment="Center" IsClosable="False" x:Name="MessageBar"/>
         </TeachingTip>
     </Grid>
 </Page>
