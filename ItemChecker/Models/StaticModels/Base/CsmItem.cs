@@ -20,9 +20,7 @@ namespace ItemChecker.Models.StaticModels.Base
 
         internal async Task UpdateAsync(string itemName, bool isInventory)
         {
-            if (!SteamAccount.Csm.IsActive || Price > 0)
-                return;
-            if (Inventory.Any() && isInventory)
+            if (Price > 0 || (Inventory.Any() && isInventory))
                 return;
 
             var items = await Get.LoadBotsInventoryItemAsync(itemName);
