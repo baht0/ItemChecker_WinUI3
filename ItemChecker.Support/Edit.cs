@@ -64,10 +64,7 @@ namespace ItemChecker.Support
             else
                 return 0;
         }
-        public static double Difference(double a, double b)
-        {
-            return Math.Round(a - b, 2);
-        }
+        public static double Difference(double a, double b) => Math.Round(a - b, 2);
 
         //time
         public static DateTime ConvertFromUnixTimestamp(double timestamp)
@@ -80,18 +77,18 @@ namespace ItemChecker.Support
             DateTime origin = new(1970, 1, 1, 0, 0, 0, 0);
             return origin.AddMilliseconds(timestamp).ToLocalTime();
         }
-        public static string calcTimeLeft(DateTime start, int count, int i)
+        public static string CalcTimeLeft(DateTime start, int count, int i)
         {
-            double min = (count - ++i) / calcTimeLeftSpeed(start, i);
+            double min = (count - ++i) / CalcSpeed(start, i);
             TimeSpan time = TimeSpan.FromMinutes(min);
             if (min > 60)
-                return time.ToString("hh'h 'mm'min'");
+                return time.ToString("hh:mm'hour'");
             else if (min > 1)
-                return time.ToString("mm'min 'ss'sec.'");
+                return time.ToString("mm:ss'min.'");
 
             return time.ToString("ss'sec.'");
         }
-        static double calcTimeLeftSpeed(DateTime start, int i)
+        private static double CalcSpeed(DateTime start, int i)
         {
             var time_passed = DateTime.Now.Subtract(start).TotalMinutes;
             return Math.Round(++i / time_passed, 2);
