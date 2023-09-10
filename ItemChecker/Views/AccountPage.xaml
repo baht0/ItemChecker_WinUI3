@@ -11,12 +11,12 @@
     mc:Ignorable="d">
     <Grid>
         <Pivot Margin="-5 0 0 0">
-            <PivotItem Header="Information">
-                <local:InfoPage/>
-            </PivotItem>
-            <PivotItem Header="Inventory">
-                <local:InventoryPage/>
-            </PivotItem>
+            <PivotItem Header="Information" x:Name="Info"/>
+            <PivotItem Header="Inventory" x:Name="Inventory"/>
         </Pivot>
+        <!--Message-->
+        <TeachingTip PreferredPlacement="Top" IsLightDismissEnabled="True" PlacementMargin="0 10 0 0" x:Name="MessageTip">
+            <InfoBar IsOpen="True" VerticalAlignment="Center" IsClosable="False" x:Name="MessageBar"/>
+        </TeachingTip>
     </Grid>
 </Page>
