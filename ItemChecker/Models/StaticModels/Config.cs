@@ -38,8 +38,14 @@ namespace ItemChecker.Models.StaticModels
             IsUpdate = latest > current;
         }
     }
-    internal class BaseConfig
+    public class BaseConfig
     {
+        public enum ActionStatus
+        {
+            None,
+            OK,
+            Error
+        }
         public static List<string> ServicesShort => new() { "SteamMarket", "Cs.Money", "Loot.Farm", "Buff163" };
         public static List<string> Services => new() { "SteamMarket(A)", "SteamMarket", "Cs.Money(T)", "Loot.Farm", "Buff163(A)", "Buff163" };
         public static List<string> RareParameters => new() { "Float", "Sticker", "Doppler" };
