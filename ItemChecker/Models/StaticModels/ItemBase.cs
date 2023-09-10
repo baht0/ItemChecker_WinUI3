@@ -1,9 +1,11 @@
-﻿using ItemChecker.Models.StaticModels.Base;
+﻿using ItemChecker.Models.Parser;
+using ItemChecker.Models.StaticModels.Base;
 using ItemChecker.Net;
 using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using static ItemChecker.Net.ServicesRequest;
@@ -15,7 +17,7 @@ namespace ItemChecker.Models.StaticModels
         public static DateTime Updated { get; set; } = new();
         public static List<Item> List { get; set; } = new();
 
-        public static async Task GetItemsBaseAsync()
+        public static async Task GetItemsBase()
         {
             var json = await DropboxRequest.Get.ReadAsync("SteamItemsBase.json");
             var jobject = JObject.Parse(json);
@@ -24,7 +26,7 @@ namespace ItemChecker.Models.StaticModels
             List = JArray.Parse(jobject["Items"].ToString()).ToObject<List<Item>>();
         }
 
-        public static async Task UpdateSteamAsync()
+        public static async Task UpdateSteam()
         {
             string json = await HttpRequest.RequestGetAsync("https://csgobackpack.net/api/GetItemsList/v2/?no_details=true");
             JObject csgobackpack = (JObject)JObject.Parse(json)["items_list"];
@@ -34,39 +36,22 @@ namespace ItemChecker.Models.StaticModels
                 baseItem.AvgPrice = Edit.SteamAvgPrice(item.ItemName, csgobackpack);
             }
         }
-        public static async Task UpdateLfmAsync()
+        public static async Task UpdateLfm()
         {
-            string json = await HttpRequest.RequestGetAsync("https://loot.farm/fullprice.json");
-            JArray array = JArray.Parse(json);
-            foreach (JToken item in array)
+            var array = await LootFarm.Get.ItemsPriceAsync();
+            await Task.Run(() =>
             {
-                string itemName = item["name"].ToString().Replace("(Holo-Foil)", "(Holo/Foil)").Replace("  ", " ");
-                if (List.FirstOrDefault(x => x.ItemName == itemName) != null)
+                foreach (JObject item in array.Cast<JObject>())
                 {
-                    double price = Convert.ToDouble(item["price"]) / 100;
-                    int have = Convert.ToInt32(item["have"]);
-                    int max = Convert.ToInt32(item["max"]);
-
-                    List.FirstOrDefault(x => x.ItemName == itemName).Lfm = new()
-                    {
-                        Updated = DateTime.Now,
-                        Price = price,
-                        Have = have,
-                        Limit = max,
-                        Reservable = Convert.ToInt32(item["res"]),
-                        Tradable = Convert.ToInt32(item["tr"]),
-                        SteamPriceRate = Convert.ToInt32(item["rate"]) / 100,
-                        IsHave = Convert.ToInt32(item["tr"]) > 0,
-                        Status = have >= max ? ItemStatus.Overstock : ItemStatus.Available
-                    };
+                    string itemName = item["name"].ToString().Replace("(Holo-Foil)", "(Holo/Foil)").Replace("  ", " ");
+                    var itemBase = List.FirstOrDefault(x => x.ItemName == itemName);
+                    if (itemBase != null)
+                        itemBase.Lfm = item.ToObject<LfmItem>();
                 }
-            }
+            });
         }
-        public static async Task UpdateCsmAsync(int minPrice, int maxPrice)
+        public static async Task UpdateCsm(double minPrice, double maxPrice)
         {
-            if (List.Select(x => x.Csm.Inventory.Select(x => x.Updated).Max()).Max().AddMinutes(30) > DateTime.Now)
-                return;
-
             int offset = 0;
 
             while (true)
@@ -77,7 +62,7 @@ namespace ItemChecker.Models.StaticModels
                     string itemName = items[0]["fullName"].ToString();
                     var itemBase = List.FirstOrDefault(x => x.ItemName == itemName).Csm;
                     itemBase.Inventory.Clear();
-                    foreach (JObject item in items)
+                    foreach (JObject item in items.Cast<JObject>())
                     {
                         InventoryCsm newItem = new()
                         {
@@ -99,79 +84,63 @@ namespace ItemChecker.Models.StaticModels
                     break;
             }
         }
-        //public static async Task UpdateBuffAsync(ParserConfig parserConfig, int serviceId)
-        //{
-        //    if (List.Select(x => x.Buff.Updated).Max().AddMinutes(30) > DateTime.Now)
-        //        return;
+        public static async Task UpdateBuff(ParserParameters parameters, int serviceId)
+        {
+            string quality = string.Empty;
+            if (parameters.Normal)
+                quality = "&quality=normal";
+            else if (parameters.Souvenir)
+                quality = "&quality=tournament";
+            else if (parameters.Stattrak)
+                quality = "&quality=strange";
+            else if (parameters.Unique)
+                quality = "&quality=unusual";
+            else if (parameters.UniqueStattrak)
+                quality = "&quality=unusual_strange";
 
-        //    string quality = string.Empty;
-        //    if (parserConfig.Normal)
-        //        quality = "&quality=normal";
-        //    else if (parserConfig.Souvenir)
-        //        quality = "&quality=tournament";
-        //    else if (parserConfig.Stattrak)
-        //        quality = "&quality=strange";
-        //    else if (parserConfig.KnifeGlove)
-        //        quality = "&quality=unusual";
-        //    else if (parserConfig.KnifeGloveStattrak)
-        //        quality = "&quality=unusual_strange";
+            var min = Currencies.ConverterFromUsd(parameters.MinPrice, Currencies.Allow.FirstOrDefault(x => x.Code == "CNY").Id);
+            var max = Currencies.ConverterFromUsd(parameters.MaxPrice, Currencies.Allow.FirstOrDefault(x => x.Code == "CNY").Id);
+            string tab = string.Empty;
 
-        //    int min = (int)Currencies.ConverterFromUsd(parserConfig.MinPrice, 23);
-        //    int max = (int)Currencies.ConverterFromUsd(parserConfig.MaxPrice, 23);
-        //    string tab = string.Empty;
+            switch (serviceId)
+            {
+                case 1:
+                    tab = parameters.ServiceOneId == 4 ? "/buying" : string.Empty;
+                    break;
+                case 2:
+                    min *= 0.5d; max *= 2.5d;
+                    tab = parameters.ServiceTwoId == 4 ? "/buying" : string.Empty;
+                    break;
+            }
+            int pages = int.MaxValue;
+            string last_item = string.Empty;
+            for (int i = 1; i <= pages; i++)
+            {
+                try
+                {
+                    string url = "https://buff.163.com/api/market/goods" + tab + $"?game=csgo&page_num={i}&min_price={min}&max_price={max}{quality}&sort_by=price.asc&page_size=80";
+                    JObject json = JObject.Parse(await Buff163.Get.RequestAsync(url));
 
-        //    switch (serviceId)
-        //    {
-        //        case 1:
-        //            tab = parserConfig.ServiceOne == 4 ? "/buying" : string.Empty;
-        //            break;
-        //        case 2:
-        //            min = (int)(parserConfig.MinPrice * 0.5m);
-        //            max = (int)(parserConfig.MaxPrice * 2.5m);
-        //            tab = parserConfig.ServiceTwo == 4 ? "/buying" : string.Empty;
-        //            break;
-        //    }
-
-        //    min = (int)Currencies.ConverterFromUsd(min, 23);
-        //    max = (int)Currencies.ConverterFromUsd(max, 23);
-        //    int pages = int.MaxValue;
-        //    string last_item = string.Empty;
-        //    for (int i = 1; i <= pages; i++)
-        //    {
-        //        try
-        //        {
-        //            string url = "https://buff.163.com/api/market/goods" + tab + $"?game=csgo&page_num={i}&min_price={min}&max_price={max}{quality}&sort_by=price.asc&page_size=80";
-        //            JObject json = JObject.Parse(await Buff163.Get.RequestAsync(url));
-
-        //            pages = Convert.ToInt32(json["data"]["total_page"]);
-        //            JArray items = json["data"]["items"] as JArray;
-        //            foreach (JObject item in items)
-        //            {
-        //                string itemName = item["market_hash_name"].ToString();
-        //                var itemBase = List.FirstOrDefault(x => x.ItemName == itemName);
-        //                if (itemBase != null && itemName != last_item)
-        //                {
-        //                    double price = Currencies.ConverterToUsd(Convert.ToDouble(item["sell_min_price"]), 23);
-        //                    itemBase.Buff = new()
-        //                    {
-        //                        Updated = DateTime.Now,
-        //                        Id = Convert.ToInt32(item["id"]),
-        //                        Price = price,
-        //                        Count = Convert.ToInt32(item["sell_num"]),
-        //                        BuyOrder = Currencies.ConverterToUsd(Convert.ToDouble(item["buy_max_price"]), 23),
-        //                        OrderCount = Convert.ToInt32(item["buy_num"]),
-        //                        IsHave = price > 0,
-        //                    };
-        //                }
-        //                last_item = item["market_hash_name"].ToString();
-        //            }
-        //        }
-        //        catch
-        //        {
-        //            continue;
-        //        }
-        //    }
-        //}
+                    pages = Convert.ToInt32(json["data"]["total_page"]);
+                    JArray items = json["data"]["items"] as JArray;
+                    foreach (JObject item in items.Cast<JObject>())
+                    {
+                        string itemName = item["market_hash_name"].ToString();
+                        var itemBase = List.FirstOrDefault(x => x.ItemName == itemName);
+                        if (itemBase != null && itemName != last_item)
+                        {
+                            itemBase.Buff = item.ToObject<BuffItem>();
+                            last_item = item["market_hash_name"].ToString();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    continue;
+                }
+            }
+        }
     }
     public class Item
     {
@@ -195,7 +164,7 @@ namespace ItemChecker.Models.StaticModels
         public async Task UpdateCsmItem(bool isInventory = false) => await Csm.UpdateAsync(ItemName, isInventory);
 
         public async Task UpdateBuffItem() => await Buff.UpdateAsync(ItemName);
-        public async Task UpdateBuffHistoryItem() => await Buff.UpdateHistoryAsync(ItemName);
+        public async Task UpdateBuffHistoryItem() => await Buff.UpdateHistoryAsync();
     }
     public enum Type
     {
