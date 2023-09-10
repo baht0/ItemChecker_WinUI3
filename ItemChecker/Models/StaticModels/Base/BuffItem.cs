@@ -1,4 +1,5 @@
 ﻿using ItemChecker.Support;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -11,13 +12,27 @@ namespace ItemChecker.Models.StaticModels.Base
 {
     public class BuffItem
     {
-        public DateTime Updated { get; set; } = DateTime.Now.AddHours(-1);
+        [JsonProperty("id")]
         public int Id { get; set; }
-        public double Price { get; set; }
+        [JsonProperty("sell_min_price")]
+        public double Price
+        {
+            get => Currencies.ConverterToUsd(price, Currencies.Allow.FirstOrDefault(x => x.Code == "CNY").Id);
+            set => price = value;
+        }
+        private double price;
+        [JsonProperty("sell_num")]
         public int Count { get; set; }
-        public double BuyOrder { get; set; }
+        [JsonProperty("buy_max_price")]
+        public double BuyOrder
+        {
+            get => Currencies.ConverterToUsd(buyOrder, Currencies.Allow.FirstOrDefault(x => x.Code == "CNY").Id);
+            set => buyOrder = value;
+        }
+        private double buyOrder;
+        [JsonProperty("buy_num")]
         public int OrderCount { get; set; }
-        public bool IsHave { get; set; }
+        public bool IsHave => price > 0;
         public List<SaleHistory> History { get; set; } = new();
 
         internal async Task UpdateAsync(string itemName)
@@ -32,24 +47,20 @@ namespace ItemChecker.Models.StaticModels.Base
             {
                 try
                 {
-                    string url = "https://buff.163.com/api/market/goods/buying?game=csgo&page_num=" + i + "&search=" + market_hash_name + "&sort_by=price.asc&page_size=80";
-                    JObject json = JObject.Parse(await Get.RequestAsync(url));
+                    JObject json = JObject.Parse(await Get.RequestAsync("https://buff.163.com/api/market/goods/buying?game=csgo&page_num=" + i + "&search=" + market_hash_name + "&sort_by=price.asc&page_size=80"));
 
                     pages = Convert.ToInt32(json["data"]["total_page"]);
                     JArray items = json["data"]["items"] as JArray;
-                    foreach (JObject item in items)
+                    foreach (JObject item in items.Cast<JObject>())
                     {
                         string serviceItemName = item["market_hash_name"].ToString();
                         if (serviceItemName == itemName && itemName != last_item)
                         {
-                            Updated = DateTime.Now;
                             Id = Convert.ToInt32(item["id"]);
-                            var price = Currencies.ConverterToUsd(Convert.ToDouble(item["sell_min_price"]), 23);
-                            Price = price;
+                            Price = Convert.ToDouble(item["sell_min_price"]);
                             Count = Convert.ToInt32(item["sell_num"]);
-                            BuyOrder = Currencies.ConverterToUsd(Convert.ToDouble(item["buy_max_price"]), 23);
+                            BuyOrder = Convert.ToDouble(item["buy_max_price"]);
                             OrderCount = Convert.ToInt32(item["buy_num"]);
-                            IsHave = price > 0;
                         }
                         last_item = serviceItemName;
                     }
@@ -60,7 +71,7 @@ namespace ItemChecker.Models.StaticModels.Base
                 }
             }
         }
-        internal async Task UpdateHistoryAsync(string itemName)
+        internal async Task UpdateHistoryAsync()
         {
             if (!SteamAccount.Buff.IsActive || History.Any() || Id == 0)
                 return;
