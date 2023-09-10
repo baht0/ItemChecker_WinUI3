@@ -3,51 +3,63 @@ using CommunityToolkit.Mvvm.Input;
 using ItemChecker.Models.StaticModels;
 using ItemChecker.Properties;
 using ItemChecker.Support;
+using System.Collections.ObjectModel;
+using System.IO;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace ItemChecker.ViewModels.AccountViewModels
 {
-    public partial class InfoViewModel : ObservableObject
+    public partial class InfoViewModel : BaseViewModel<object>
     {
         [ObservableProperty]
-        string _avatarUrl = SteamAccount.AvatarUrl;
+        string avatarUrl = SteamAccount.AvatarUrl;
         [ObservableProperty]
-        string _accountName = SteamAccount.AccountName;
+        string accountName = SteamAccount.AccountName;
         [ObservableProperty]
-        string _userName = SteamAccount.UserName;
+        string userName = SteamAccount.UserName;
         [ObservableProperty]
-        string _apiKey = new('●', SteamAccount.ApiKey.Length);
+        string apiKey = new('●', SteamAccount.ApiKey.Length);
         [ObservableProperty]
-        string _id64 = SteamAccount.ID64;
+        string id64 = SteamAccount.ID64;
         [ObservableProperty]
-        string _currencyName = SteamAccount.Currency.Name;
+        ObservableCollection<DataCurrency> currencies = new(Support.Currencies.All);
+        [ObservableProperty]
+        DataCurrency currency = SteamAccount.Currency;
 
         [ObservableProperty]
-        bool _isActiveCsm = SteamAccount.Csm.IsActive;
-        public string ActiveCsm => _isActiveCsm ? "Active" : "Inactive";
-        [ObservableProperty]
-        bool _isActiveLfm = SteamAccount.Lfm.IsActive;
-        public string ActiveLfm => _isActiveLfm ? "Active" : "Inactive";
-        [ObservableProperty]
-        bool _isActiveBuff = SteamAccount.Buff.IsActive;
-        public string ActiveBuff => _isActiveBuff ? "Active" : "Inactive";
+        bool isActiveBuff = SteamAccount.Buff.IsActive;
+        public string ActiveBuff => isActiveBuff ? "Active" : "Inactive";
 
-        partial void OnIsActiveCsmChanged(bool value) => AppProperties.Services.CSM = value;
-        partial void OnIsActiveLfmChanged(bool value) => AppProperties.Services.LFM = value;
-        partial void OnIsActiveBuffChanged(bool value) => AppProperties.Services.BUFF = value;
+        partial void OnCurrencyChanged(DataCurrency value)
+        {
+            AppProperties.Account.SteamCurrencyId = value.Id;
+            MessageShow("Currency", "The change will take effect after the application is restarted.", 2);
+        }
+        partial void OnIsActiveBuffChanged(bool value)
+        {
+            AppProperties.Account.BUFF = value;
+            MessageShow("Active services", "The change will take effect after the application is restarted.", 2);
+        }
 
         [RelayCommand]
         private void ShowProfile() => Edit.OpenUrl("https://steamcommunity.com/profiles/" + Id64);
         [RelayCommand]
         private void SignOut()
         {
-            AppProperties.User.SteamCurrencyId = 0;
+            File.Delete(AppConfig.DocumentPath + "user\\cookies.json");
+            AppProperties.Account.SteamCurrencyId = 0;
             App.HandleClosedEvents = false;
             var mainWindow = (MainWindow)App.MainWindow;
             mainWindow?.Close();
         }
         [RelayCommand]
-        private void ShowApiKey() => ApiKey = SteamAccount.ApiKey;
+        private void ShowApiKey()
+        {
+            if (ApiKey.Contains('●'))
+                ApiKey = SteamAccount.ApiKey;
+            else
+                ApiKey = new('●', SteamAccount.ApiKey.Length);
+        }
         [RelayCommand]
         private void CopyBtn(string name)
         {
@@ -56,9 +68,11 @@ namespace ItemChecker.ViewModels.AccountViewModels
             {
                 case "apiKey":
                     dataPackage.SetText(SteamAccount.ApiKey);
+                    MessageShow("Api Key", "Copied.", 1);
                     break;
                 case "id64":
                     dataPackage.SetText(SteamAccount.ID64);
+                    MessageShow("ID64", "Copied.", 1);
                     break;
             }
             Clipboard.SetContent(dataPackage);

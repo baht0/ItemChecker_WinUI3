@@ -15,9 +15,7 @@ namespace ItemChecker.ViewModels.AccountViewModels
     {
         public string CurrencyTable => SteamAccount.Currency.Name;
         [ObservableProperty]
-        SellParameters _parameters = new();
-        [ObservableProperty]
-        Records _records = new();
+        SellParameters parameters = new();
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(RefreshCommand), new string[] { nameof(AcceptTradesCommand), nameof(SellItemsCommand) })]
@@ -44,25 +42,11 @@ namespace ItemChecker.ViewModels.AccountViewModels
                 Info = await SteamAccount.Inventory.Main();
                 Items = new(SteamAccount.Inventory.Items);
 
-                LoadingBar = new(true, title, "Calculating balance...");
-                await Records.RefreshRecords();
-                MessageBar = new()
-                {
-                    IsOpen = true,
-                    Severity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success,
-                    Title = title,
-                    Message = "Successful refreshed."
-                };
+                MessageShow(title, "Successful refreshed.", 1);
             }
             catch
             {
-                MessageBar = new()
-                {
-                    IsOpen = true,
-                    Severity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error,
-                    Title = title,
-                    Message = "An error has occurred."
-                };
+                MessageShow(title, "An error has occurred.", 3);
             }
             finally
             {
@@ -81,23 +65,11 @@ namespace ItemChecker.ViewModels.AccountViewModels
                     await SteamAccount.Inventory.Main();
                     Items = new(SteamAccount.Inventory.Items);
                 }
-                MessageBar = new()
-                {
-                    IsOpen = true,
-                    Severity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success,
-                    Title = "Accept trades",
-                    Message = $"{accepted} accepted."
-                };
+                MessageShow("Accept trades", $"{accepted} accepted.", 1);
             }
             catch
             {
-                MessageBar = new()
-                {
-                    IsOpen = true,
-                    Severity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error,
-                    Title = "Accept trades",
-                    Message = "An error has occurred."
-                };
+                MessageShow("Accept trades", "An error has occurred.", 3);
             }
             finally
             {
@@ -111,23 +83,11 @@ namespace ItemChecker.ViewModels.AccountViewModels
             {
                 LoadingBar = new(true, "Sell items", "Working...");
                 await SteamAccount.Inventory.SellItemAsync(Parameters);
-                MessageBar = new()
-                {
-                    IsOpen = true,
-                    Severity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success,
-                    Title = "Sell items",
-                    Message = $"Sale listing created."
-                };
+                MessageShow("Sell items", "Sale listing created.", 3);
             }
             catch
             {
-                MessageBar = new()
-                {
-                    IsOpen = true,
-                    Severity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error,
-                    Title = "Sell items",
-                    Message = "An error has occurred."
-                };
+                MessageShow("Sell items", "An error has occurred.", 3);
             }
             finally
             {
@@ -161,12 +121,5 @@ namespace ItemChecker.ViewModels.AccountViewModels
             };
             Items = new(sort);
         }
-
-        [RelayCommand]
-        private void SwitchInterval(int index) => Records.SwitchInterval(index);
-        [RelayCommand]
-        private void BeginInterval(DateTime date) => Records.BeginInterval(date);
-        [RelayCommand]
-        private void EndInterval(DateTime date) => Records.EndInterval(date);
     }
 }
