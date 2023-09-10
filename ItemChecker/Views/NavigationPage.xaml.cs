@@ -9,8 +9,6 @@ namespace ItemChecker.Views
         public NavigationPage()
         {
             this.InitializeComponent();
-
-            NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().First();
             ContentFrame.Navigate(typeof(ParserPage));
         }
 
@@ -18,12 +16,16 @@ namespace ItemChecker.Views
         {
             if (args.IsSettingsInvoked == true)
             {
-                ContentFrame.Navigate(typeof(SettingsPage), null, args.RecommendedNavigationTransitionInfo);
+                if (!ContentFrame.CurrentSourcePageType.Name.Contains("Settings"))
+                    ContentFrame.Navigate(typeof(SettingsPage), null, args.RecommendedNavigationTransitionInfo);
             }
-            else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
+            else if (args.InvokedItemContainer != null && args.InvokedItemContainer.Tag != null)
             {
-                var newPage = Type.GetType(args.InvokedItemContainer.Tag.ToString());
-                ContentFrame.Navigate(newPage, args.RecommendedNavigationTransitionInfo);
+                if (ContentFrame.CurrentSourcePageType.FullName != args.InvokedItemContainer.Tag.ToString())
+                {
+                    var newPage = Type.GetType(args.InvokedItemContainer.Tag.ToString());
+                    ContentFrame.Navigate(newPage, null, args.RecommendedNavigationTransitionInfo);
+                }
             }
         }
         private void ContentFrame_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
@@ -35,16 +37,14 @@ namespace ItemChecker.Views
                 NavigationViewControl.SelectedItem = (NavigationViewItem)NavigationViewControl.SettingsItem;
                 NavigationViewControl.Header = ((NavigationViewItem)NavigationViewControl.SelectedItem)?.Content?.ToString();
             }
-            else if (ContentFrame.SourcePageType == typeof(AccountPage))
-            {
-                NavigationViewControl.SelectedItem = NavigationViewControl.FooterMenuItems.OfType<NavigationViewItem>().First();
-                ContentFrame.Navigate(typeof(AccountPage));
-                NavigationViewControl.Header = "Account";
-            }
             else if (ContentFrame.SourcePageType != null)
             {
-                NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>()
-                    .FirstOrDefault(n => n.Tag.Equals(ContentFrame.SourcePageType.FullName.ToString()));
+                var navigationViewItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>()
+                    .FirstOrDefault(x => x.Tag != null && x.Tag.ToString() == ContentFrame.SourcePageType.FullName);
+
+                NavigationViewControl.SelectedItem = navigationViewItem ?? NavigationViewControl.FooterMenuItems.OfType<NavigationViewItem>()
+                    .FirstOrDefault(x => x.Tag.ToString() == ContentFrame.SourcePageType.FullName);
+
                 NavigationViewControl.Header = ((NavigationViewItem)NavigationViewControl.SelectedItem)?.Content?.ToString();
             }
         }
@@ -54,5 +54,6 @@ namespace ItemChecker.Views
             calculatorTeachingTip.Content = new CalculatorPage();
             calculatorTeachingTip.IsOpen = !calculatorTeachingTip.IsOpen;
         }
+        public void DatabasePageInvoke(object item) => ContentFrame.Navigate(typeof(DatabasePage), item);
     }
 }
