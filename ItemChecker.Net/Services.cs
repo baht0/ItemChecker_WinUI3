@@ -41,12 +41,8 @@ namespace ItemChecker.Net
 
         public class CsMoney : Helpers
         {
-            static string Domain { get; set; } = "cs.money";
-            internal static CookieContainer Cookies { get; set; } = new();
             public class Get
             {
-                public static async Task<string> RequestAsync(string url) => await RequestGetAsync(url, Cookies);
-
                 public static async Task<JObject> ItemInfoAsync(JObject item)
                 {
                     string json = await RequestGetAsync("https://cs.money/skin_info?appId=730&id=" + item["assetId"] + "&isBot=true&botInventory=true");
@@ -58,7 +54,7 @@ namespace ItemChecker.Net
                     string json = await RequestGetAsync("https://cs.money/check_skin_status?appId=730&name=" + market_hash_name);
                     return JObject.Parse(json);
                 }
-                public static async Task<JArray> LoadBotsInventoryAsync(int offset, int minPrice, int maxPrice)
+                public static async Task<JArray> LoadBotsInventoryAsync(int offset, double minPrice, double maxPrice)
                 {
                     string price = $"maxPrice={maxPrice}&minPrice={minPrice}&";
 
@@ -91,95 +87,16 @@ namespace ItemChecker.Net
 
                     return null;
                 }
-
-                public static async Task<JArray> InventoryItemsAsync()
-                {
-                    string json = await RequestAsync("https://cs.money/3.0/load_user_inventory/730?isPrime=false&limit=60&noCache=true&offset=0&order=desc&sort=price&withStack=true");
-                    var obj = JObject.Parse(json);
-                    return obj.ContainsKey("items") ? JArray.Parse(obj["items"].ToString()) : new();
-                }
-
-                public static async Task<double> BalanceAsync()
-                {
-                    try
-                    {
-                        HtmlDocument htmlDoc = new();
-                        var html = await RequestAsync("https://cs.money/personal-info/");
-                        htmlDoc.LoadHtml(html);
-                        string trade = htmlDoc.DocumentNode.SelectSingleNode("/html/body/div[1]/div/div/div[2]/div[1]/div/div[6]/div[1]/div[2]/div/div[1]/span[2]").InnerText;
-                        html = await RequestAsync("https://cs.money/market/buy/");
-                        htmlDoc.LoadHtml(html);
-                        string market = htmlDoc.DocumentNode.SelectSingleNode("/html/body/div[1]/div/div/div[2]/div[1]/div/div[6]/div[1]/div[2]/div/div[1]/span[2]").InnerText;
-
-                        return GetDouble(market) + GetDouble(trade);
-                    }
-                    catch
-                    {
-                        return 0;
-                    }
-                }
-                internal static async Task<bool> IsAuthorizedAsync()
-                {
-                    Cookies = await DeserializeCookie(Domain);
-                    if (Cookies == null || Cookies.Count == 0)
-                        return false;
-
-                    var json = await RequestAsync("https://cs.money/3.0/load_user_inventory/730");
-                    return !JObject.Parse(json).ContainsKey("error");
-                }
-            }
-            public class Post
-            {
-                public static async Task SignInAsync()
-                {
-                    if (!await Get.IsAuthorizedAsync())
-                    {
-                        Cookies = await GetCookieAsync("https://auth.dota.trade/login?redirectUrl=https://cs.money/ru/&callbackUrl=https://cs.money/login", "https://cs.money");
-                        await SerializeCookieAsync(Cookies, Domain);
-                    }
-                }
             }
         }
         public class LootFarm : Helpers
         {
-            static string Domain { get; set; } = "loot.farm";
-            internal static CookieContainer Cookies { get; set; } = new();
             public class Get
             {
-                public static async Task<string> RequestAsync(string url) => await RequestGetAsync(url, Cookies);
-                public static async Task<JObject> InventoryItemsAsync()
+                public static async Task<JArray> ItemsPriceAsync()
                 {
-                    string json = await RequestAsync("https://loot.farm/getReserves.php");
-                    var obj = JObject.Parse(json);
-                    return obj["result"] as JObject;
-                }
-
-                public static async Task<double> BalanceAsync()
-                {
-                    var json = await RequestAsync("https://loot.farm/login_data.php");
-                    var balance = Convert.ToInt32(JObject.Parse(json)["balance"]);
-                    return Convert.ToDouble(balance) / 100;
-                }
-                internal static async Task<bool> IsAuthorizedAsync()
-                {
-                    Cookies = await DeserializeCookie(Domain);
-                    if (Cookies == null || Cookies.Count == 0)
-                        return false;
-
-                    var json = await RequestAsync("https://loot.farm/historyJSON.php");
-
-                    return !JObject.Parse(json).ContainsKey("error");
-                }
-            }
-            public class Post
-            {
-                public static async Task SignInAsync()
-                {
-                    if (!await Get.IsAuthorizedAsync())
-                    {
-                        Cookies = await GetCookieAsync("https://authsb.trade/lootlogin.php", "https://loot.farm");
-                        await SerializeCookieAsync(Cookies, Domain);
-                    }
+                    string json = await RequestGetAsync("https://loot.farm/fullprice.json");
+                    return JArray.Parse(json);
                 }
             }
         }
@@ -190,12 +107,6 @@ namespace ItemChecker.Net
             public class Get
             {
                 public static async Task<string> RequestAsync(string url) => await RequestGetAsync(url, Cookies);
-                public static async Task<double> BalanceAsync()
-                {
-                    var json = await RequestAsync("https://buff.163.com/api/asset/get_brief_asset/");
-                    var balanceInCny = Convert.ToDouble(JObject.Parse(json)["data"]["alipay_amount"]);
-                    return balanceInCny;
-                }
 
                 internal static async Task<bool> IsAuthorizedAsync()
                 {
