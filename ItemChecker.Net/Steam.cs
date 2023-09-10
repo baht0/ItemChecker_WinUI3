@@ -122,7 +122,7 @@ namespace ItemChecker.Net
                 return await RequestPostAsync(url, args, headers);
             }
 
-            public static async Task<HttpResponseMessage> CreateBuyOrder(string itemName, double highest_buy_order, int count, int currencyId)
+            public static async Task<HttpResponseMessage> CreateBuyOrder(string itemName, double highest_buy_order, int currencyId, int count = 1)
             {
                 string market_hash_name = Uri.EscapeDataString(itemName);
                 Dictionary<string, string> args = new()
@@ -218,7 +218,9 @@ namespace ItemChecker.Net
         }
         public class Session : Helpers
         {
-            static StartResponse _startResponse { get; set; }
+            public static bool IsSetToken { get; private set; }
+            private static LoginPassResponse PassResponse { get; set; }
+            private static LoginQrResponse QrResponse { get; set; }
 
             public static async Task<bool> IsAuthorizedAsync()
             {
@@ -233,32 +235,17 @@ namespace ItemChecker.Net
 
                 return !title.Contains("Sign In");
             }
+
+            //Login with password
             public static async Task<bool> SubmitSignIn(string accountName, string password)
             {
                 var rsa = new RsaPassword();
                 var rsaPass = await rsa.GetEncryptedPasswordAsync(accountName, password);
-                _startResponse = await BeginAuthSessionViaCredentials(accountName, rsaPass);
+                await BeginAuthSessionViaCredentials(accountName, rsaPass);
 
-                return _startResponse != null;
+                return PassResponse != null;
             }
-            public static async Task SubmitCode(string code) => await UpdateAuthSessionWithSteamGuardCode(_startResponse, code);
-            public static async Task<bool> CheckAuthStatus()
-            {
-                PollResponse pollResponse = await PollAuthSessionStatus(_startResponse);
-                if (pollResponse == null)
-                    return false;
-
-                var finalizeResponse = await FinalizeLogin(pollResponse);
-                var httpResponse = await SetToken(finalizeResponse);
-
-                Cookies = GetCookieContainer("https://steamcommunity.com/", httpResponse);
-                Cookies.Add(SessionId);
-                await SerializeCookieAsync(Cookies, "steamcommunity.com");
-
-                return true;
-            }
-
-            static async Task<StartResponse> BeginAuthSessionViaCredentials(string accountName, RsaPassword rsaPassword)
+            static async Task BeginAuthSessionViaCredentials(string accountName, RsaPassword rsaPassword)
             {
                 string url = "https://api.steampowered.com/IAuthenticationService/BeginAuthSessionViaCredentials/v1/";
 
@@ -280,35 +267,92 @@ namespace ItemChecker.Net
                 var jobject = JObject.Parse(json)["response"] as JObject;
                 if (jobject.ContainsKey("steamid"))
                 {
-                    return new StartResponse()
+                    PassResponse = new LoginPassResponse()
                     {
                         ClientId = jobject["client_id"].ToString(),
                         RequestId = jobject["request_id"].ToString(),
                         Interval = jobject["interval"].ToString(),
-                        AllowedConfirmations = StartResponse.GetAllowedConfirmations(JArray.Parse(jobject["allowed_confirmations"].ToString())),
+                        AllowedConfirmations = LoginPassResponse.GetAllowedConfirmations(JArray.Parse(jobject["allowed_confirmations"].ToString())),
                         SteamId = jobject["steamid"].ToString(),
                         WeakToken = jobject["weak_token"].ToString(),
                         ExtendedErrorMessage = jobject["extended_error_message"].ToString()
                     };
                 }
-                return null;
             }
-            static async Task UpdateAuthSessionWithSteamGuardCode(StartResponse data, string code)
+            public static async Task SubmitCode(string code) => await UpdateAuthSessionWithSteamGuardCode(code);
+            static async Task UpdateAuthSessionWithSteamGuardCode(string code)
             {
                 string url = "https://api.steampowered.com/IAuthenticationService/UpdateAuthSessionWithSteamGuardCode/v1/";
                 Dictionary<string, string> args = new()
                 {
                     {"access_token", string.Empty},
-                    {"client_id", data.ClientId},
-                    {"steamid", data.SteamId},
+                    {"client_id", PassResponse.ClientId},
+                    {"steamid", PassResponse.SteamId},
                     {"code", code},
                     {"code_type", "3"},
                 };
+                await SessionRequestPostAsync(url, args);
+            }
+
+            //Login with QR code
+            public static async Task<string> BeginAuthSessionViaQR()
+            {
+                string url = "https://api.steampowered.com/IAuthenticationService/BeginAuthSessionViaQR/v1/";
+
+                Dictionary<string, string> args = new()
+                {
+                    {"device_friendly_name", Uri.EscapeDataString(UserAgent)},
+                    {"platform_type", "2"},
+                    {"website_id", "Community"},
+                };
                 var response = await SessionRequestPostAsync(url, args);
                 string json = await ToResponseStringAsync(response);
+
+                var jobject = JObject.Parse(json)["response"] as JObject;
+                QrResponse = new LoginQrResponse()
+                {
+                    ClientId = jobject["client_id"].ToString(),
+                    ChallengeUrl = jobject["challenge_url"].ToString(),
+                    RequestId = jobject["request_id"].ToString(),
+                    Interval = jobject["interval"].ToString(),
+                    AllowedConfirmations = LoginQrResponse.GetAllowedConfirmations(JArray.Parse(jobject["allowed_confirmations"].ToString())),
+                    Version = Convert.ToInt32(jobject["version"]),
+                };
+
+                return "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=?x=" + QrResponse.ChallengeUrl;
             }
-            static async Task<PollResponse> PollAuthSessionStatus(StartResponse data)
+
+            //Check AuthSessionStatus
+            public static async void CheckAuthStatus()
             {
+                PollResponse pollResponse = null;
+                while (pollResponse == null)
+                {
+                    pollResponse = await PollAuthSessionStatus();
+                    if (pollResponse != null)
+                        break;
+                    await Task.Delay(5000);
+                }
+
+                var finalizeResponse = await FinalizeLogin(pollResponse);
+                var httpResponse = await SetToken(finalizeResponse);
+
+                Cookies = GetCookieContainer("https://steamcommunity.com/", httpResponse);
+                Cookies.Add(SessionId);
+                await SerializeCookieAsync(Cookies, "steamcommunity.com");
+
+                IsSetToken = true;
+            }
+            static async Task<PollResponse> PollAuthSessionStatus()
+            {
+                dynamic data = null;
+                if (PassResponse != null)
+                    data = PassResponse;
+                else if (QrResponse != null)
+                    data = QrResponse;
+                else
+                    return data;
+
                 string url = "https://api.steampowered.com/IAuthenticationService/PollAuthSessionStatus/v1/";
                 Dictionary<string, string> args = new()
                 {
