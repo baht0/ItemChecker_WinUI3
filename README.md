@@ -1,3 +1,5 @@
+![image](https://github.com/baht0/ItemChecker_WinUI3/assets/70800526/997f154b-80b9-41fb-bc7e-47f963037f38)
+
 ![image](https://github.com/baht0/ItemChecker_WinUI3/assets/70800526/77fdc8ed-1673-42be-98b4-cef4661e6fdb)
 
 ![image](https://github.com/baht0/ItemChecker_WinUI3/assets/70800526/10f0f0f8-3484-462d-9f34-9a77f373a1ed)
